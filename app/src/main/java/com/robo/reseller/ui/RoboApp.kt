@@ -20,10 +20,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.layout.verticalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.weight
+
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.Download
@@ -31,6 +32,7 @@ import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Logout
+
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -38,6 +40,7 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -49,6 +52,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.darkColorScheme
+
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -57,6 +62,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -70,8 +76,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
-import coil.compose.AsyncImage
 
 import com.robo.reseller.R
 import com.robo.reseller.data.*
@@ -136,7 +140,9 @@ fun Bg(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(
+                    rememberScrollState()
+                )
                 .padding(
                     horizontal = 16.dp,
                     vertical = 8.dp
@@ -305,8 +311,8 @@ fun Login(
                     }
                 },
                 enabled = username.isNotBlank() &&
-                        password.isNotBlank() &&
-                        !loading,
+                    password.isNotBlank() &&
+                    !loading,
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Blue
@@ -421,7 +427,7 @@ fun MainTabs(
                         },
 
                         icon = {
-                            androidx.compose.material3.Icon(
+                            Icon(
                                 imageVector = icon,
                                 contentDescription = labels[index]
                             )
@@ -486,6 +492,7 @@ fun Home(
     }
 
     Bg {
+
         Header()
 
         if (user != null) {
@@ -493,6 +500,7 @@ fun Home(
             val currentUser = user!!
 
             CardBox {
+
                 Text(
                     text = "ACCOUNT OVERVIEW",
                     fontSize = 12.sp,
@@ -546,6 +554,7 @@ fun Home(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
+
                         Text(
                             text = "AVAILABLE BALANCE",
                             fontSize = 12.sp,
@@ -568,7 +577,7 @@ fun Home(
                         modifier = Modifier.weight(1f)
                     )
 
-                    androidx.compose.material3.Icon(
+                    Icon(
                         imageVector = Icons.Default.AccountBalanceWallet,
                         contentDescription = null,
                         tint = BrightBlue,
@@ -580,9 +589,7 @@ fun Home(
         } else if (error.isNotEmpty()) {
 
             CardBox {
-                Text(
-                    text = error
-                )
+                Text(error)
             }
 
         } else {
@@ -597,6 +604,7 @@ fun Home(
         )
 
         CardBox {
+
             Text(
                 text = "QUICK ACCESS",
                 fontSize = 12.sp,
@@ -610,7 +618,8 @@ fun Home(
             )
 
             Row {
-                androidx.compose.material3.Icon(
+
+                Icon(
                     imageVector = Icons.Default.GridView,
                     contentDescription = null,
                     tint = BrightBlue
@@ -629,7 +638,7 @@ fun Home(
                     modifier = Modifier.weight(1f)
                 )
 
-                androidx.compose.material3.Icon(
+                Icon(
                     imageVector = Icons.Default.Key,
                     contentDescription = null,
                     tint = BrightBlue
@@ -658,7 +667,8 @@ fun Home(
                 color = Blue
             )
         ) {
-            androidx.compose.material3.Icon(
+
+            Icon(
                 imageVector = Icons.Default.Logout,
                 contentDescription = null
             )
@@ -709,6 +719,7 @@ fun Products(
     }
 
     Bg {
+
         Header()
 
         if (error.isNotEmpty()) {
@@ -723,7 +734,8 @@ fun Products(
             !busy
         ) {
             CardBox {
-                androidx.compose.material3.Icon(
+
+                Icon(
                     imageVector = Icons.Default.GridView,
                     contentDescription = null,
                     tint = BrightBlue,
@@ -754,9 +766,9 @@ fun Products(
 
                 product.description
                     ?.takeIf { it.isNotBlank() }
-                    ?.let {
+                    ?.let { description ->
                         Text(
-                            text = it,
+                            text = description,
                             fontSize = 14.sp,
                             color = MutedWhite
                         )
@@ -764,9 +776,9 @@ fun Products(
 
                 product.version
                     ?.takeIf { it.isNotBlank() }
-                    ?.let {
+                    ?.let { version ->
                         Text(
-                            text = "VERSION  $it",
+                            text = "VERSION  $version",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             color = BrightBlue
@@ -787,9 +799,8 @@ fun Products(
                             )
                             .padding(12.dp),
 
-                        verticalArrangement = Arrangement.spacedBy(
-                            10.dp
-                        )
+                        verticalArrangement =
+                            Arrangement.spacedBy(10.dp)
                     ) {
 
                         Row(
@@ -804,7 +815,8 @@ fun Products(
                                 )
 
                                 Text(
-                                    text = "${category.available_count} available",
+                                    text =
+                                        "${category.available_count} available",
                                     fontSize = 12.sp,
                                     color = MutedWhite
                                 )
@@ -835,7 +847,9 @@ fun Products(
                                     try {
 
                                         val result =
-                                            ApiClient.getKey(category.id)
+                                            ApiClient.getKey(
+                                                category.id
+                                            )
 
                                         dialog =
                                             "KEY\n${result.key}\nNew balance: ${
@@ -846,12 +860,14 @@ fun Products(
                                                 )
                                             }"
 
-                                        products = ApiClient.products()
+                                        products =
+                                            ApiClient.products()
 
                                     } catch (e: Exception) {
 
                                         dialog =
-                                            e.message ?: "Purchase failed"
+                                            e.message
+                                                ?: "Purchase failed"
                                     }
 
                                     busy = false
@@ -860,19 +876,22 @@ fun Products(
 
                             enabled =
                                 category.available_count > 0 &&
-                                        !busy,
+                                    !busy,
 
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier =
+                                Modifier.fillMaxWidth(),
 
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Blue
-                            ),
+                            colors =
+                                ButtonDefaults.buttonColors(
+                                    containerColor = Blue
+                                ),
 
-                            shape = RoundedCornerShape(12.dp)
+                            shape =
+                                RoundedCornerShape(12.dp)
 
                         ) {
 
-                            androidx.compose.material3.Icon(
+                            Icon(
                                 imageVector = Icons.Default.Key,
                                 contentDescription = null
                             )
@@ -905,7 +924,7 @@ fun Products(
                             }
                         ) {
 
-                            androidx.compose.material3.Icon(
+                            Icon(
                                 imageVector = Icons.Default.Download,
                                 contentDescription = null
                             )
@@ -993,7 +1012,7 @@ fun Keys() {
         ) {
             CardBox {
 
-                androidx.compose.material3.Icon(
+                Icon(
                     imageVector = Icons.Default.Key,
                     contentDescription = null,
                     tint = BrightBlue,
@@ -1017,10 +1036,11 @@ fun Keys() {
             CardBox {
 
                 Row(
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment =
+                        Alignment.CenterVertically
                 ) {
 
-                    androidx.compose.material3.Icon(
+                    Icon(
                         imageVector = Icons.Default.Key,
                         contentDescription = null,
                         tint = BrightBlue
@@ -1031,7 +1051,8 @@ fun Keys() {
                     )
 
                     Text(
-                        text = key.category_name.uppercase(),
+                        text =
+                            key.category_name.uppercase(),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         color = BrightBlue
@@ -1042,7 +1063,8 @@ fun Keys() {
                     )
 
                     Text(
-                        text = key.status.uppercase(),
+                        text =
+                            key.status.uppercase(),
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -1062,9 +1084,9 @@ fun Keys() {
 
                 key.issued_at
                     ?.takeIf { it.isNotBlank() }
-                    ?.let {
+                    ?.let { issued ->
                         Text(
-                            text = "Issued: $it",
+                            text = "Issued: $issued",
                             fontSize = 11.sp,
                             color = MutedWhite
                         )
@@ -1113,7 +1135,7 @@ fun Updates(
         ) {
             CardBox {
 
-                androidx.compose.material3.Icon(
+                Icon(
                     imageVector = Icons.Default.Download,
                     contentDescription = null,
                     tint = BrightBlue,
@@ -1126,7 +1148,8 @@ fun Updates(
                 )
 
                 Text(
-                    text = "Published updates will appear here.",
+                    text =
+                        "Published updates will appear here.",
                     color = MutedWhite
                 )
             }
@@ -1157,7 +1180,8 @@ fun Updates(
                                 .border(
                                     width = 1.dp,
                                     color = BrightBlue,
-                                    shape = RoundedCornerShape(20.dp)
+                                    shape =
+                                        RoundedCornerShape(20.dp)
                                 )
                                 .padding(
                                     horizontal = 9.dp,
@@ -1168,22 +1192,23 @@ fun Updates(
                 }
 
                 Text(
-                    text = "${update.version} — ${update.title}",
+                    text =
+                        "${update.version} — ${update.title}",
                     fontWeight = FontWeight.Bold,
                     color = BrightBlue
                 )
 
                 update.patch_notes
                     ?.takeIf { it.isNotBlank() }
-                    ?.let {
-                        Text(it)
+                    ?.let { notes ->
+                        Text(notes)
                     }
 
                 update.release_date
                     ?.takeIf { it.isNotBlank() }
-                    ?.let {
+                    ?.let { date ->
                         Text(
-                            text = it,
+                            text = date,
                             fontSize = 11.sp,
                             color = MutedWhite
                         )
@@ -1203,28 +1228,35 @@ fun Updates(
                                 )
                             },
 
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier =
+                                Modifier.fillMaxWidth(),
 
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Blue
-                            ),
+                            colors =
+                                ButtonDefaults.buttonColors(
+                                    containerColor = Blue
+                                ),
 
-                            shape = RoundedCornerShape(12.dp)
+                            shape =
+                                RoundedCornerShape(12.dp)
 
                         ) {
 
-                            androidx.compose.material3.Icon(
-                                imageVector = Icons.Default.Download,
+                            Icon(
+                                imageVector =
+                                    Icons.Default.Download,
                                 contentDescription = null
                             )
 
                             Spacer(
-                                modifier = Modifier.width(6.dp)
+                                modifier =
+                                    Modifier.width(6.dp)
                             )
 
                             Text(
-                                text = "DOWNLOAD UPDATE",
-                                fontWeight = FontWeight.Bold
+                                text =
+                                    "DOWNLOAD UPDATE",
+                                fontWeight =
+                                    FontWeight.Bold
                             )
                         }
                     }
