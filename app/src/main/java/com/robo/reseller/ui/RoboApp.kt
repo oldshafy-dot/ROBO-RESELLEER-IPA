@@ -20,10 +20,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.verticalScroll
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.layout.weight
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.clip
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalanceWallet
@@ -65,8 +65,7 @@ import androidx.compose.runtime.setValue
 
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -140,9 +139,7 @@ fun Bg(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(
-                    rememberScrollState()
-                )
+                .verticalScroll(rememberScrollState())
                 .padding(
                     horizontal = 16.dp,
                     vertical = 8.dp
@@ -238,6 +235,7 @@ fun Login(
         Header(compact = false)
 
         CardBox {
+
             Text(
                 text = "WELCOME BACK",
                 fontSize = 13.sp,
@@ -294,8 +292,12 @@ fun Login(
                                 password
                             )
 
-                            if (result.role.lowercase() != "reseller") {
+                            if (
+                                result.role.lowercase() !=
+                                "reseller"
+                            ) {
                                 ApiClient.logout(context)
+
                                 throw Exception(
                                     "Please sign in with a reseller account."
                                 )
@@ -304,13 +306,15 @@ fun Login(
                             onLogin()
 
                         } catch (e: Exception) {
-                            error = e.message ?: "Login failed"
+                            error =
+                                e.message ?: "Login failed"
                         }
 
                         loading = false
                     }
                 },
-                enabled = username.isNotBlank() &&
+                enabled =
+                    username.isNotBlank() &&
                     password.isNotBlank() &&
                     !loading,
                 modifier = Modifier.fillMaxWidth(),
@@ -319,6 +323,7 @@ fun Login(
                 ),
                 shape = RoundedCornerShape(14.dp)
             ) {
+
                 if (loading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(18.dp),
@@ -392,17 +397,21 @@ fun MainTabs(
                         fontWeight = FontWeight.Bold
                     )
                 },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Background,
-                    titleContentColor = Color.White
-                )
+                colors =
+                    TopAppBarDefaults
+                        .centerAlignedTopAppBarColors(
+                            containerColor = Background,
+                            titleContentColor = Color.White
+                        )
             )
         },
 
         bottomBar = {
+
             NavigationBar(
                 containerColor = Color.Black
             ) {
+
                 val icons = listOf(
                     Icons.Default.Home,
                     Icons.Default.GridView,
@@ -429,7 +438,8 @@ fun MainTabs(
                         icon = {
                             Icon(
                                 imageVector = icon,
-                                contentDescription = labels[index]
+                                contentDescription =
+                                    labels[index]
                             )
                         },
 
@@ -437,13 +447,19 @@ fun MainTabs(
                             Text(labels[index])
                         },
 
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = BrightBlue,
-                            selectedTextColor = BrightBlue,
-                            unselectedIconColor = MutedWhite,
-                            unselectedTextColor = MutedWhite,
-                            indicatorColor = Card
-                        )
+                        colors =
+                            NavigationBarItemDefaults.colors(
+                                selectedIconColor =
+                                    BrightBlue,
+                                selectedTextColor =
+                                    BrightBlue,
+                                unselectedIconColor =
+                                    MutedWhite,
+                                unselectedTextColor =
+                                    MutedWhite,
+                                indicatorColor =
+                                    Card
+                            )
                     )
                 }
             }
@@ -453,7 +469,9 @@ fun MainTabs(
         Box(
             modifier = Modifier.padding(paddingValues)
         ) {
+
             when (tab) {
+
                 0 -> Home(
                     ctx = ctx,
                     onLogout = onLogout
@@ -512,6 +530,7 @@ fun Home(
                 Row(
                     modifier = Modifier.fillMaxWidth()
                 ) {
+
                     Text(
                         text = "Username",
                         color = MutedWhite
@@ -529,6 +548,7 @@ fun Home(
                 Row(
                     modifier = Modifier.fillMaxWidth()
                 ) {
+
                     Text(
                         text = "Role",
                         color = MutedWhite
@@ -539,9 +559,11 @@ fun Home(
                     )
 
                     Text(
-                        text = currentUser.role.replaceFirstChar {
-                            it.uppercase()
-                        }
+                        text =
+                            currentUser.role
+                                .replaceFirstChar {
+                                    it.uppercase()
+                                }
                     )
                 }
 
@@ -551,8 +573,10 @@ fun Home(
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment =
+                        Alignment.CenterVertically
                 ) {
+
                     Column {
 
                         Text(
@@ -578,7 +602,8 @@ fun Home(
                     )
 
                     Icon(
-                        imageVector = Icons.Default.AccountBalanceWallet,
+                        imageVector =
+                            Icons.Default.AccountBalanceWallet,
                         contentDescription = null,
                         tint = BrightBlue,
                         modifier = Modifier.size(32.dp)
@@ -614,13 +639,15 @@ fun Home(
             )
 
             Text(
-                text = "Manage your products, keys and latest updates from one place."
+                text =
+                    "Manage your products, keys and latest updates from one place."
             )
 
             Row {
 
                 Icon(
-                    imageVector = Icons.Default.GridView,
+                    imageVector =
+                        Icons.Default.GridView,
                     contentDescription = null,
                     tint = BrightBlue
                 )
@@ -639,7 +666,8 @@ fun Home(
                 )
 
                 Icon(
-                    imageVector = Icons.Default.Key,
+                    imageVector =
+                        Icons.Default.Key,
                     contentDescription = null,
                     tint = BrightBlue
                 )
@@ -669,7 +697,8 @@ fun Home(
         ) {
 
             Icon(
-                imageVector = Icons.Default.Logout,
+                imageVector =
+                    Icons.Default.Logout,
                 contentDescription = null
             )
 
@@ -706,6 +735,7 @@ fun Products(
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
+
         busy = true
 
         try {
@@ -723,6 +753,7 @@ fun Products(
         Header()
 
         if (error.isNotEmpty()) {
+
             CardBox {
                 Text(error)
             }
@@ -733,10 +764,12 @@ fun Products(
             error.isEmpty() &&
             !busy
         ) {
+
             CardBox {
 
                 Icon(
-                    imageVector = Icons.Default.GridView,
+                    imageVector =
+                        Icons.Default.GridView,
                     contentDescription = null,
                     tint = BrightBlue,
                     modifier = Modifier.size(38.dp)
@@ -748,7 +781,8 @@ fun Products(
                 )
 
                 Text(
-                    text = "Products will appear here when available.",
+                    text =
+                        "Products will appear here when available.",
                     color = MutedWhite
                 )
             }
@@ -767,6 +801,7 @@ fun Products(
                 product.description
                     ?.takeIf { it.isNotBlank() }
                     ?.let { description ->
+
                         Text(
                             text = description,
                             fontSize = 14.sp,
@@ -777,6 +812,7 @@ fun Products(
                 product.version
                     ?.takeIf { it.isNotBlank() }
                     ?.let { version ->
+
                         Text(
                             text = "VERSION  $version",
                             fontSize = 12.sp,
@@ -790,12 +826,15 @@ fun Products(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(14.dp))
+                            .clip(
+                                RoundedCornerShape(14.dp)
+                            )
                             .background(Color.Black)
                             .border(
                                 width = 1.dp,
                                 color = Blue,
-                                shape = RoundedCornerShape(14.dp)
+                                shape =
+                                    RoundedCornerShape(14.dp)
                             )
                             .padding(12.dp),
 
@@ -804,14 +843,16 @@ fun Products(
                     ) {
 
                         Row(
-                            modifier = Modifier.fillMaxWidth()
+                            modifier =
+                                Modifier.fillMaxWidth()
                         ) {
 
                             Column {
 
                                 Text(
                                     text = category.name,
-                                    fontWeight = FontWeight.Bold
+                                    fontWeight =
+                                        FontWeight.Bold
                                 )
 
                                 Text(
@@ -823,16 +864,19 @@ fun Products(
                             }
 
                             Spacer(
-                                modifier = Modifier.weight(1f)
+                                modifier =
+                                    Modifier.weight(1f)
                             )
 
                             Text(
                                 text = String.format(
                                     Locale.US,
                                     "$%.2f",
-                                    category.price_cents / 100.0
+                                    category.price_cents /
+                                        100.0
                                 ),
-                                fontWeight = FontWeight.Bold,
+                                fontWeight =
+                                    FontWeight.Bold,
                                 color = BrightBlue
                             )
                         }
@@ -875,16 +919,18 @@ fun Products(
                             },
 
                             enabled =
-                                category.available_count > 0 &&
-                                    !busy,
+                                category.available_count >
+                                    0 && !busy,
 
                             modifier =
                                 Modifier.fillMaxWidth(),
 
                             colors =
-                                ButtonDefaults.buttonColors(
-                                    containerColor = Blue
-                                ),
+                                ButtonDefaults
+                                    .buttonColors(
+                                        containerColor =
+                                            Blue
+                                    ),
 
                             shape =
                                 RoundedCornerShape(12.dp)
@@ -892,17 +938,20 @@ fun Products(
                         ) {
 
                             Icon(
-                                imageVector = Icons.Default.Key,
+                                imageVector =
+                                    Icons.Default.Key,
                                 contentDescription = null
                             )
 
                             Spacer(
-                                modifier = Modifier.width(8.dp)
+                                modifier =
+                                    Modifier.width(8.dp)
                             )
 
                             Text(
                                 text = "GET KEY",
-                                fontWeight = FontWeight.Bold,
+                                fontWeight =
+                                    FontWeight.Bold,
                                 letterSpacing = 1.sp
                             )
                         }
@@ -915,6 +964,7 @@ fun Products(
 
                         TextButton(
                             onClick = {
+
                                 ctx.startActivity(
                                     Intent(
                                         Intent.ACTION_VIEW,
@@ -925,16 +975,19 @@ fun Products(
                         ) {
 
                             Icon(
-                                imageVector = Icons.Default.Download,
+                                imageVector =
+                                    Icons.Default.Download,
                                 contentDescription = null
                             )
 
                             Spacer(
-                                modifier = Modifier.width(5.dp)
+                                modifier =
+                                    Modifier.width(5.dp)
                             )
 
                             Text(
-                                text = "Product Download",
+                                text =
+                                    "Product Download",
                                 color = BrightBlue
                             )
                         }
@@ -943,6 +996,7 @@ fun Products(
         }
 
         if (busy) {
+
             CircularProgressIndicator(
                 color = BrightBlue
             )
@@ -951,11 +1005,13 @@ fun Products(
         dialog?.let { message ->
 
             AlertDialog(
+
                 onDismissRequest = {
                     dialog = null
                 },
 
                 confirmButton = {
+
                     TextButton(
                         onClick = {
                             dialog = null
@@ -1001,6 +1057,7 @@ fun Keys() {
         Header()
 
         if (error.isNotEmpty()) {
+
             CardBox {
                 Text(error)
             }
@@ -1010,10 +1067,12 @@ fun Keys() {
             keys.isEmpty() &&
             error.isEmpty()
         ) {
+
             CardBox {
 
                 Icon(
-                    imageVector = Icons.Default.Key,
+                    imageVector =
+                        Icons.Default.Key,
                     contentDescription = null,
                     tint = BrightBlue,
                     modifier = Modifier.size(38.dp)
@@ -1025,7 +1084,8 @@ fun Keys() {
                 )
 
                 Text(
-                    text = "Purchased keys will appear here.",
+                    text =
+                        "Purchased keys will appear here.",
                     color = MutedWhite
                 )
             }
@@ -1041,13 +1101,15 @@ fun Keys() {
                 ) {
 
                     Icon(
-                        imageVector = Icons.Default.Key,
+                        imageVector =
+                            Icons.Default.Key,
                         contentDescription = null,
                         tint = BrightBlue
                     )
 
                     Spacer(
-                        modifier = Modifier.width(6.dp)
+                        modifier =
+                            Modifier.width(6.dp)
                     )
 
                     Text(
@@ -1059,7 +1121,8 @@ fun Keys() {
                     )
 
                     Spacer(
-                        modifier = Modifier.weight(1f)
+                        modifier =
+                            Modifier.weight(1f)
                     )
 
                     Text(
@@ -1073,7 +1136,8 @@ fun Keys() {
                 Text(
                     text = key.key_value,
                     fontFamily = FontFamily.Monospace,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight =
+                        FontWeight.SemiBold
                 )
 
                 Text(
@@ -1085,6 +1149,7 @@ fun Keys() {
                 key.issued_at
                     ?.takeIf { it.isNotBlank() }
                     ?.let { issued ->
+
                         Text(
                             text = "Issued: $issued",
                             fontSize = 11.sp,
@@ -1124,6 +1189,7 @@ fun Updates(
         Header()
 
         if (error.isNotEmpty()) {
+
             CardBox {
                 Text(error)
             }
@@ -1133,10 +1199,12 @@ fun Updates(
             updates.isEmpty() &&
             error.isEmpty()
         ) {
+
             CardBox {
 
                 Icon(
-                    imageVector = Icons.Default.Download,
+                    imageVector =
+                        Icons.Default.Download,
                     contentDescription = null,
                     tint = BrightBlue,
                     modifier = Modifier.size(38.dp)
@@ -1163,25 +1231,31 @@ fun Updates(
 
                     Text(
                         text = update.product_name,
-                        fontWeight = FontWeight.Bold
+                        fontWeight =
+                            FontWeight.Bold
                     )
 
                     Spacer(
-                        modifier = Modifier.weight(1f)
+                        modifier =
+                            Modifier.weight(1f)
                     )
 
                     if (update.is_latest == true) {
+
                         Text(
                             text = "LATEST",
                             fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
+                            fontWeight =
+                                FontWeight.Bold,
                             color = BrightBlue,
                             modifier = Modifier
                                 .border(
                                     width = 1.dp,
                                     color = BrightBlue,
                                     shape =
-                                        RoundedCornerShape(20.dp)
+                                        RoundedCornerShape(
+                                            20.dp
+                                        )
                                 )
                                 .padding(
                                     horizontal = 9.dp,
@@ -1194,19 +1268,22 @@ fun Updates(
                 Text(
                     text =
                         "${update.version} — ${update.title}",
-                    fontWeight = FontWeight.Bold,
+                    fontWeight =
+                        FontWeight.Bold,
                     color = BrightBlue
                 )
 
                 update.patch_notes
                     ?.takeIf { it.isNotBlank() }
                     ?.let { notes ->
+
                         Text(notes)
                     }
 
                 update.release_date
                     ?.takeIf { it.isNotBlank() }
                     ?.let { date ->
+
                         Text(
                             text = date,
                             fontSize = 11.sp,
@@ -1220,6 +1297,7 @@ fun Updates(
 
                         Button(
                             onClick = {
+
                                 ctx.startActivity(
                                     Intent(
                                         Intent.ACTION_VIEW,
@@ -1232,9 +1310,11 @@ fun Updates(
                                 Modifier.fillMaxWidth(),
 
                             colors =
-                                ButtonDefaults.buttonColors(
-                                    containerColor = Blue
-                                ),
+                                ButtonDefaults
+                                    .buttonColors(
+                                        containerColor =
+                                            Blue
+                                    ),
 
                             shape =
                                 RoundedCornerShape(12.dp)
