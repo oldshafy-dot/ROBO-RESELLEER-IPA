@@ -20,8 +20,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.clip
 
@@ -32,7 +32,6 @@ import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Logout
-
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -40,7 +39,6 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -53,7 +51,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.darkColorScheme
-
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -62,31 +59,40 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.alpha
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-import com.robo.reseller.R
-import com.robo.reseller.data.*
-import com.robo.reseller.ui.theme.*
+import com.robo.reseller.data.ApiClient
+import com.robo.reseller.data.ApiUser
+import com.robo.reseller.data.KeyRecord
+import com.robo.reseller.data.PanelUpdate
+import com.robo.reseller.data.Product
+import com.robo.reseller.ui.theme.Background
+import com.robo.reseller.ui.theme.Blue
+import com.robo.reseller.ui.theme.BrightBlue
+import com.robo.reseller.ui.theme.Card
+import com.robo.reseller.ui.theme.MutedWhite
 
 import kotlinx.coroutines.launch
-
 import java.util.Locale
 
 
 @Composable
 fun RoboApp(ctx: Context) {
+
+    var logged by remember {
+        mutableStateOf(ApiClient.loggedIn())
+    }
+
     MaterialTheme(
         colorScheme = darkColorScheme(
             background = Background,
@@ -94,11 +100,9 @@ fun RoboApp(ctx: Context) {
             primary = BrightBlue
         )
     ) {
-        var logged by remember {
-            mutableStateOf(ApiClient.loggedIn())
-        }
 
         if (logged) {
+
             MainTabs(
                 ctx = ctx,
                 onLogout = {
@@ -106,12 +110,12 @@ fun RoboApp(ctx: Context) {
                     logged = false
                 }
             )
+
         } else {
-            Login(
-                onLogin = {
-                    logged = true
-                }
-            )
+
+            Login {
+                logged = true
+            }
         }
     }
 }
@@ -121,13 +125,17 @@ fun RoboApp(ctx: Context) {
 fun Bg(
     content: @Composable ColumnScope.() -> Unit
 ) {
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Background)
     ) {
+
         Image(
-            painter = painterResource(R.drawable.robo_logo),
+            painter = androidx.compose.ui.res.painterResource(
+                com.robo.reseller.R.drawable.robo_logo
+            ),
             contentDescription = null,
             modifier = Modifier
                 .fillMaxWidth()
@@ -154,23 +162,37 @@ fun Bg(
 fun Header(
     compact: Boolean = true
 ) {
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth()
     ) {
-        val logoWidth = if (compact) 150.dp else 245.dp
-        val logoHeight = if (compact) 60.dp else 90.dp
 
         Image(
-            painter = painterResource(R.drawable.robo_logo),
+            painter = androidx.compose.ui.res.painterResource(
+                com.robo.reseller.R.drawable.robo_logo
+            ),
             contentDescription = null,
             modifier = Modifier
-                .width(logoWidth)
-                .height(logoHeight),
+                .width(
+                    if (compact) {
+                        150.dp
+                    } else {
+                        245.dp
+                    }
+                )
+                .height(
+                    if (compact) {
+                        60.dp
+                    } else {
+                        100.dp
+                    }
+                ),
             contentScale = ContentScale.Fit
         )
 
         if (!compact) {
+
             Text(
                 text = "RESELLER PORTAL",
                 fontSize = 11.sp,
@@ -187,6 +209,7 @@ fun Header(
 fun CardBox(
     content: @Composable ColumnScope.() -> Unit
 ) {
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -208,6 +231,7 @@ fun CardBox(
 fun Login(
     onLogin: () -> Unit
 ) {
+
     var username by remember {
         mutableStateOf("")
     }
@@ -225,14 +249,22 @@ fun Login(
     }
 
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
+
+    val context = androidx.compose.ui.platform.LocalContext.current
 
     Bg {
+
         Spacer(
             modifier = Modifier.height(25.dp)
         )
 
-        Header(compact = false)
+        Header(
+            compact = false
+        )
+
+        Spacer(
+            modifier = Modifier.height(20.dp)
+        )
 
         CardBox {
 
@@ -272,6 +304,7 @@ fun Login(
             )
 
             if (error.isNotEmpty()) {
+
                 Text(
                     text = error,
                     color = Color.White,
@@ -281,21 +314,24 @@ fun Login(
 
             Button(
                 onClick = {
+
                     scope.launch {
+
                         loading = true
                         error = ""
 
                         try {
-                            val result = ApiClient.login(
+
+                            val user = ApiClient.login(
                                 context,
                                 username,
                                 password
                             )
 
                             if (
-                                result.role.lowercase() !=
-                                "reseller"
+                                user.role.lowercase(Locale.US) != "reseller"
                             ) {
+
                                 ApiClient.logout(context)
 
                                 throw Exception(
@@ -306,11 +342,13 @@ fun Login(
                             onLogin()
 
                         } catch (e: Exception) {
-                            error =
-                                e.message ?: "Login failed"
-                        }
 
-                        loading = false
+                            error = e.message ?: "Login failed"
+
+                        } finally {
+
+                            loading = false
+                        }
                     }
                 },
                 enabled =
@@ -325,18 +363,29 @@ fun Login(
             ) {
 
                 if (loading) {
+
                     CircularProgressIndicator(
                         modifier = Modifier.size(18.dp),
                         color = Color.White
                     )
 
+                } else {
+
                     Spacer(
-                        modifier = Modifier.width(10.dp)
+                        modifier = Modifier.width(2.dp)
                     )
                 }
 
+                Spacer(
+                    modifier = Modifier.width(10.dp)
+                )
+
                 Text(
-                    text = "SIGN IN",
+                    text = if (loading) {
+                        "SIGNING IN..."
+                    } else {
+                        "SIGN IN"
+                    },
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.2.sp
                 )
@@ -357,7 +406,6 @@ fun Login(
 }
 
 
-@Composable
 private fun fieldColors() =
     OutlinedTextFieldDefaults.colors(
         focusedBorderColor = BrightBlue,
@@ -375,6 +423,7 @@ fun MainTabs(
     ctx: Context,
     onLogout: () -> Unit
 ) {
+
     var tab by remember {
         mutableIntStateOf(0)
     }
@@ -386,23 +435,38 @@ fun MainTabs(
         "UPDATES"
     )
 
+    val labels = listOf(
+        "Home",
+        "Products",
+        "My Keys",
+        "Updates"
+    )
+
+    val icons = listOf(
+        Icons.Default.Home,
+        Icons.Default.GridView,
+        Icons.Default.Key,
+        Icons.Default.Download
+    )
+
     Scaffold(
         containerColor = Background,
 
         topBar = {
+
             CenterAlignedTopAppBar(
                 title = {
+
                     Text(
                         text = titles[tab],
                         fontWeight = FontWeight.Bold
                     )
                 },
                 colors =
-                    TopAppBarDefaults
-                        .centerAlignedTopAppBarColors(
-                            containerColor = Background,
-                            titleContentColor = Color.White
-                        )
+                    TopAppBarDefaults.centerAlignedTopAppBarColors(
+                        containerColor = Background,
+                        titleContentColor = Color.White
+                    )
             )
         },
 
@@ -411,20 +475,6 @@ fun MainTabs(
             NavigationBar(
                 containerColor = Color.Black
             ) {
-
-                val icons = listOf(
-                    Icons.Default.Home,
-                    Icons.Default.GridView,
-                    Icons.Default.Key,
-                    Icons.Default.Download
-                )
-
-                val labels = listOf(
-                    "Home",
-                    "Products",
-                    "My Keys",
-                    "Updates"
-                )
 
                 icons.forEachIndexed { index, icon ->
 
@@ -436,10 +486,9 @@ fun MainTabs(
                         },
 
                         icon = {
-                            Icon(
+                            androidx.compose.material3.Icon(
                                 imageVector = icon,
-                                contentDescription =
-                                    labels[index]
+                                contentDescription = labels[index]
                             )
                         },
 
@@ -449,16 +498,11 @@ fun MainTabs(
 
                         colors =
                             NavigationBarItemDefaults.colors(
-                                selectedIconColor =
-                                    BrightBlue,
-                                selectedTextColor =
-                                    BrightBlue,
-                                unselectedIconColor =
-                                    MutedWhite,
-                                unselectedTextColor =
-                                    MutedWhite,
-                                indicatorColor =
-                                    Card
+                                selectedIconColor = BrightBlue,
+                                selectedTextColor = BrightBlue,
+                                unselectedIconColor = MutedWhite,
+                                unselectedTextColor = MutedWhite,
+                                indicatorColor = Card
                             )
                     )
                 }
@@ -477,11 +521,15 @@ fun MainTabs(
                     onLogout = onLogout
                 )
 
-                1 -> Products(ctx)
+                1 -> Products(
+                    ctx = ctx
+                )
 
                 2 -> Keys()
 
-                3 -> Updates(ctx)
+                3 -> Updates(
+                    ctx = ctx
+                )
             }
         }
     }
@@ -493,6 +541,7 @@ fun Home(
     ctx: Context,
     onLogout: () -> Unit
 ) {
+
     var user by remember {
         mutableStateOf<ApiUser?>(null)
     }
@@ -502,9 +551,13 @@ fun Home(
     }
 
     LaunchedEffect(Unit) {
+
         try {
+
             user = ApiClient.me()
+
         } catch (e: Exception) {
+
             error = e.message ?: "Request failed"
         }
     }
@@ -512,6 +565,10 @@ fun Home(
     Bg {
 
         Header()
+
+        Spacer(
+            modifier = Modifier.height(12.dp)
+        )
 
         if (user != null) {
 
@@ -559,11 +616,9 @@ fun Home(
                     )
 
                     Text(
-                        text =
-                            currentUser.role
-                                .replaceFirstChar {
-                                    it.uppercase()
-                                }
+                        text = currentUser.role.replaceFirstChar {
+                            it.uppercase()
+                        }
                     )
                 }
 
@@ -573,8 +628,7 @@ fun Home(
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment =
-                        Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
 
                     Column {
@@ -601,7 +655,7 @@ fun Home(
                         modifier = Modifier.weight(1f)
                     )
 
-                    Icon(
+                    androidx.compose.material3.Icon(
                         imageVector =
                             Icons.Default.AccountBalanceWallet,
                         contentDescription = null,
@@ -614,7 +668,11 @@ fun Home(
         } else if (error.isNotEmpty()) {
 
             CardBox {
-                Text(error)
+
+                Text(
+                    text = error,
+                    color = Color.White
+                )
             }
 
         } else {
@@ -639,21 +697,22 @@ fun Home(
             )
 
             Text(
-                text =
-                    "Manage your products, keys and latest updates from one place."
+                text = "Manage your products, keys and latest updates from one place."
             )
 
-            Row {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
 
-                Icon(
-                    imageVector =
-                        Icons.Default.GridView,
+                androidx.compose.material3.Icon(
+                    imageVector = Icons.Default.GridView,
                     contentDescription = null,
                     tint = BrightBlue
                 )
 
                 Spacer(
-                    modifier = Modifier.width(6.dp)
+                    modifier = Modifier.width(8.dp)
                 )
 
                 Text(
@@ -665,15 +724,14 @@ fun Home(
                     modifier = Modifier.weight(1f)
                 )
 
-                Icon(
-                    imageVector =
-                        Icons.Default.Key,
+                androidx.compose.material3.Icon(
+                    imageVector = Icons.Default.Key,
                     contentDescription = null,
                     tint = BrightBlue
                 )
 
                 Spacer(
-                    modifier = Modifier.width(6.dp)
+                    modifier = Modifier.width(8.dp)
                 )
 
                 Text(
@@ -696,9 +754,8 @@ fun Home(
             )
         ) {
 
-            Icon(
-                imageVector =
-                    Icons.Default.Logout,
+            androidx.compose.material3.Icon(
+                imageVector = Icons.Default.Logout,
                 contentDescription = null
             )
 
@@ -706,7 +763,9 @@ fun Home(
                 modifier = Modifier.width(8.dp)
             )
 
-            Text("Log Out")
+            Text(
+                text = "Log Out"
+            )
         }
     }
 }
@@ -716,6 +775,7 @@ fun Home(
 fun Products(
     ctx: Context
 ) {
+
     var products by remember {
         mutableStateOf<List<Product>>(emptyList())
     }
@@ -739,23 +799,36 @@ fun Products(
         busy = true
 
         try {
+
             products = ApiClient.products()
             error = ""
-        } catch (e: Exception) {
-            error = e.message ?: "Request failed"
-        }
 
-        busy = false
+        } catch (e: Exception) {
+
+            error = e.message ?: "Request failed"
+
+        } finally {
+
+            busy = false
+        }
     }
 
     Bg {
 
         Header()
 
+        Spacer(
+            modifier = Modifier.height(12.dp)
+        )
+
         if (error.isNotEmpty()) {
 
             CardBox {
-                Text(error)
+
+                Text(
+                    text = error,
+                    color = Color.White
+                )
             }
         }
 
@@ -767,9 +840,8 @@ fun Products(
 
             CardBox {
 
-                Icon(
-                    imageVector =
-                        Icons.Default.GridView,
+                androidx.compose.material3.Icon(
+                    imageVector = Icons.Default.GridView,
                     contentDescription = null,
                     tint = BrightBlue,
                     modifier = Modifier.size(38.dp)
@@ -781,8 +853,7 @@ fun Products(
                 )
 
                 Text(
-                    text =
-                        "Products will appear here when available.",
+                    text = "Products will appear here when available.",
                     color = MutedWhite
                 )
             }
@@ -800,10 +871,10 @@ fun Products(
 
                 product.description
                     ?.takeIf { it.isNotBlank() }
-                    ?.let { description ->
+                    ?.let {
 
                         Text(
-                            text = description,
+                            text = it,
                             fontSize = 14.sp,
                             color = MutedWhite
                         )
@@ -811,10 +882,10 @@ fun Products(
 
                 product.version
                     ?.takeIf { it.isNotBlank() }
-                    ?.let { version ->
+                    ?.let {
 
                         Text(
-                            text = "VERSION  $version",
+                            text = "VERSION  $it",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             color = BrightBlue
@@ -833,8 +904,7 @@ fun Products(
                             .border(
                                 width = 1.dp,
                                 color = Blue,
-                                shape =
-                                    RoundedCornerShape(14.dp)
+                                shape = RoundedCornerShape(14.dp)
                             )
                             .padding(12.dp),
 
@@ -843,16 +913,14 @@ fun Products(
                     ) {
 
                         Row(
-                            modifier =
-                                Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth()
                         ) {
 
                             Column {
 
                                 Text(
                                     text = category.name,
-                                    fontWeight =
-                                        FontWeight.Bold
+                                    fontWeight = FontWeight.Bold
                                 )
 
                                 Text(
@@ -864,19 +932,16 @@ fun Products(
                             }
 
                             Spacer(
-                                modifier =
-                                    Modifier.weight(1f)
+                                modifier = Modifier.weight(1f)
                             )
 
                             Text(
                                 text = String.format(
                                     Locale.US,
                                     "$%.2f",
-                                    category.price_cents /
-                                        100.0
+                                    category.price_cents / 100.0
                                 ),
-                                fontWeight =
-                                    FontWeight.Bold,
+                                fontWeight = FontWeight.Bold,
                                 color = BrightBlue
                             )
                         }
@@ -896,13 +961,14 @@ fun Products(
                                             )
 
                                         dialog =
-                                            "KEY\n${result.key}\nNew balance: ${
-                                                String.format(
-                                                    Locale.US,
-                                                    "$%.2f",
-                                                    result.balance
-                                                )
-                                            }"
+                                            "KEY\n" +
+                                            "${result.key}\n" +
+                                            "New balance: " +
+                                            String.format(
+                                                Locale.US,
+                                                "$%.2f",
+                                                result.balance
+                                            )
 
                                         products =
                                             ApiClient.products()
@@ -912,46 +978,42 @@ fun Products(
                                         dialog =
                                             e.message
                                                 ?: "Purchase failed"
-                                    }
 
-                                    busy = false
+                                    } finally {
+
+                                        busy = false
+                                    }
                                 }
                             },
 
                             enabled =
-                                category.available_count >
-                                    0 && !busy,
+                                category.available_count > 0 &&
+                                !busy,
 
                             modifier =
                                 Modifier.fillMaxWidth(),
 
                             colors =
-                                ButtonDefaults
-                                    .buttonColors(
-                                        containerColor =
-                                            Blue
-                                    ),
+                                ButtonDefaults.buttonColors(
+                                    containerColor = Blue
+                                ),
 
                             shape =
                                 RoundedCornerShape(12.dp)
-
                         ) {
 
-                            Icon(
-                                imageVector =
-                                    Icons.Default.Key,
+                            androidx.compose.material3.Icon(
+                                imageVector = Icons.Default.Key,
                                 contentDescription = null
                             )
 
                             Spacer(
-                                modifier =
-                                    Modifier.width(8.dp)
+                                modifier = Modifier.width(8.dp)
                             )
 
                             Text(
                                 text = "GET KEY",
-                                fontWeight =
-                                    FontWeight.Bold,
+                                fontWeight = FontWeight.Bold,
                                 letterSpacing = 1.sp
                             )
                         }
@@ -974,20 +1036,17 @@ fun Products(
                             }
                         ) {
 
-                            Icon(
-                                imageVector =
-                                    Icons.Default.Download,
+                            androidx.compose.material3.Icon(
+                                imageVector = Icons.Default.Download,
                                 contentDescription = null
                             )
 
                             Spacer(
-                                modifier =
-                                    Modifier.width(5.dp)
+                                modifier = Modifier.width(5.dp)
                             )
 
                             Text(
-                                text =
-                                    "Product Download",
+                                text = "Product Download",
                                 color = BrightBlue
                             )
                         }
@@ -997,6 +1056,10 @@ fun Products(
 
         if (busy) {
 
+            Spacer(
+                modifier = Modifier.height(12.dp)
+            )
+
             CircularProgressIndicator(
                 color = BrightBlue
             )
@@ -1005,7 +1068,6 @@ fun Products(
         dialog?.let { message ->
 
             AlertDialog(
-
                 onDismissRequest = {
                     dialog = null
                 },
@@ -1017,11 +1079,13 @@ fun Products(
                             dialog = null
                         }
                     ) {
+
                         Text("OK")
                     }
                 },
 
                 text = {
+
                     Text(message)
                 },
 
@@ -1046,8 +1110,11 @@ fun Keys() {
     LaunchedEffect(Unit) {
 
         try {
+
             keys = ApiClient.keys()
+
         } catch (e: Exception) {
+
             error = e.message ?: "Request failed"
         }
     }
@@ -1056,10 +1123,18 @@ fun Keys() {
 
         Header()
 
+        Spacer(
+            modifier = Modifier.height(12.dp)
+        )
+
         if (error.isNotEmpty()) {
 
             CardBox {
-                Text(error)
+
+                Text(
+                    text = error,
+                    color = Color.White
+                )
             }
         }
 
@@ -1070,9 +1145,8 @@ fun Keys() {
 
             CardBox {
 
-                Icon(
-                    imageVector =
-                        Icons.Default.Key,
+                androidx.compose.material3.Icon(
+                    imageVector = Icons.Default.Key,
                     contentDescription = null,
                     tint = BrightBlue,
                     modifier = Modifier.size(38.dp)
@@ -1084,8 +1158,7 @@ fun Keys() {
                 )
 
                 Text(
-                    text =
-                        "Purchased keys will appear here.",
+                    text = "Purchased keys will appear here.",
                     color = MutedWhite
                 )
             }
@@ -1100,16 +1173,14 @@ fun Keys() {
                         Alignment.CenterVertically
                 ) {
 
-                    Icon(
-                        imageVector =
-                            Icons.Default.Key,
+                    androidx.compose.material3.Icon(
+                        imageVector = Icons.Default.Key,
                         contentDescription = null,
                         tint = BrightBlue
                     )
 
                     Spacer(
-                        modifier =
-                            Modifier.width(6.dp)
+                        modifier = Modifier.width(8.dp)
                     )
 
                     Text(
@@ -1121,13 +1192,11 @@ fun Keys() {
                     )
 
                     Spacer(
-                        modifier =
-                            Modifier.weight(1f)
+                        modifier = Modifier.weight(1f)
                     )
 
                     Text(
-                        text =
-                            key.status.uppercase(),
+                        text = key.status.uppercase(),
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -1136,8 +1205,7 @@ fun Keys() {
                 Text(
                     text = key.key_value,
                     fontFamily = FontFamily.Monospace,
-                    fontWeight =
-                        FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold
                 )
 
                 Text(
@@ -1148,10 +1216,10 @@ fun Keys() {
 
                 key.issued_at
                     ?.takeIf { it.isNotBlank() }
-                    ?.let { issued ->
+                    ?.let {
 
                         Text(
-                            text = "Issued: $issued",
+                            text = "Issued: $it",
                             fontSize = 11.sp,
                             color = MutedWhite
                         )
@@ -1178,8 +1246,11 @@ fun Updates(
     LaunchedEffect(Unit) {
 
         try {
+
             updates = ApiClient.updates()
+
         } catch (e: Exception) {
+
             error = e.message ?: "Request failed"
         }
     }
@@ -1188,10 +1259,18 @@ fun Updates(
 
         Header()
 
+        Spacer(
+            modifier = Modifier.height(12.dp)
+        )
+
         if (error.isNotEmpty()) {
 
             CardBox {
-                Text(error)
+
+                Text(
+                    text = error,
+                    color = Color.White
+                )
             }
         }
 
@@ -1202,9 +1281,8 @@ fun Updates(
 
             CardBox {
 
-                Icon(
-                    imageVector =
-                        Icons.Default.Download,
+                androidx.compose.material3.Icon(
+                    imageVector = Icons.Default.Download,
                     contentDescription = null,
                     tint = BrightBlue,
                     modifier = Modifier.size(38.dp)
@@ -1216,8 +1294,7 @@ fun Updates(
                 )
 
                 Text(
-                    text =
-                        "Published updates will appear here.",
+                    text = "Published updates will appear here.",
                     color = MutedWhite
                 )
             }
@@ -1227,17 +1304,19 @@ fun Updates(
 
             CardBox {
 
-                Row {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment =
+                        Alignment.CenterVertically
+                ) {
 
                     Text(
                         text = update.product_name,
-                        fontWeight =
-                            FontWeight.Bold
+                        fontWeight = FontWeight.Bold
                     )
 
                     Spacer(
-                        modifier =
-                            Modifier.weight(1f)
+                        modifier = Modifier.weight(1f)
                     )
 
                     if (update.is_latest == true) {
@@ -1245,17 +1324,14 @@ fun Updates(
                         Text(
                             text = "LATEST",
                             fontSize = 11.sp,
-                            fontWeight =
-                                FontWeight.Bold,
+                            fontWeight = FontWeight.Bold,
                             color = BrightBlue,
                             modifier = Modifier
                                 .border(
                                     width = 1.dp,
                                     color = BrightBlue,
                                     shape =
-                                        RoundedCornerShape(
-                                            20.dp
-                                        )
+                                        RoundedCornerShape(20.dp)
                                 )
                                 .padding(
                                     horizontal = 9.dp,
@@ -1268,24 +1344,25 @@ fun Updates(
                 Text(
                     text =
                         "${update.version} — ${update.title}",
-                    fontWeight =
-                        FontWeight.Bold,
+                    fontWeight = FontWeight.Bold,
                     color = BrightBlue
                 )
 
                 update.patch_notes
                     ?.takeIf { it.isNotBlank() }
-                    ?.let { notes ->
+                    ?.let {
 
-                        Text(notes)
+                        Text(
+                            text = it
+                        )
                     }
 
                 update.release_date
                     ?.takeIf { it.isNotBlank() }
-                    ?.let { date ->
+                    ?.let {
 
                         Text(
-                            text = date,
+                            text = it,
                             fontSize = 11.sp,
                             color = MutedWhite
                         )
@@ -1310,33 +1387,27 @@ fun Updates(
                                 Modifier.fillMaxWidth(),
 
                             colors =
-                                ButtonDefaults
-                                    .buttonColors(
-                                        containerColor =
-                                            Blue
-                                    ),
+                                ButtonDefaults.buttonColors(
+                                    containerColor = Blue
+                                ),
 
                             shape =
                                 RoundedCornerShape(12.dp)
-
                         ) {
 
-                            Icon(
+                            androidx.compose.material3.Icon(
                                 imageVector =
                                     Icons.Default.Download,
                                 contentDescription = null
                             )
 
                             Spacer(
-                                modifier =
-                                    Modifier.width(6.dp)
+                                modifier = Modifier.width(6.dp)
                             )
 
                             Text(
-                                text =
-                                    "DOWNLOAD UPDATE",
-                                fontWeight =
-                                    FontWeight.Bold
+                                text = "DOWNLOAD UPDATE",
+                                fontWeight = FontWeight.Bold
                             )
                         }
                     }
