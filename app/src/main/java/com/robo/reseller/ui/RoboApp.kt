@@ -1,430 +1,372 @@
+
 package com.robo.reseller.ui
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBalanceWallet
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Logout
-
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.darkColorScheme
-
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
-
+import androidx.compose.material.icons.filled.OpenInNew
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
 import com.robo.reseller.data.ApiClient
 import com.robo.reseller.data.ApiUser
 import com.robo.reseller.data.KeyRecord
 import com.robo.reseller.data.PanelUpdate
 import com.robo.reseller.data.Product
-
-import com.robo.reseller.ui.theme.Background
-import com.robo.reseller.ui.theme.Blue
-import com.robo.reseller.ui.theme.BrightBlue
-import com.robo.reseller.ui.theme.Card
-import com.robo.reseller.ui.theme.MutedWhite
-
 import kotlinx.coroutines.launch
 import java.util.Locale
 
+private val Black = Color(0xFF000000)
+private val SurfaceDark = Color(0xFF101113)
+private val SurfaceLight = Color(0xFF17191D)
+private val Blue = Color(0xFF168FFF)
+private val White = Color(0xFFF7F8FA)
+private val Gray = Color(0xFF9A9DA5)
+private val BorderGray = Color(0xFF292C32)
+private val Green = Color(0xFF59D69A)
 
 @Composable
 fun RoboApp(ctx: Context) {
-
-    var logged by remember {
-        mutableStateOf(ApiClient.loggedIn())
-    }
+    var loggedIn by remember { mutableStateOf(ApiClient.loggedIn()) }
 
     MaterialTheme(
         colorScheme = darkColorScheme(
-            background = Background,
-            surface = Background,
-            primary = BrightBlue
+            background = Black,
+            surface = SurfaceDark,
+            primary = Blue,
+            onPrimary = White,
+            onBackground = White,
+            onSurface = White,
+            secondary = Gray,
+            error = Color(0xFFFF7777)
         )
     ) {
-
-        if (logged) {
-
-            MainTabs(
-                ctx = ctx,
-                onLogout = {
-                    ApiClient.logout(ctx)
-                    logged = false
-                }
-            )
-
-        } else {
-
-            Login {
-                logged = true
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = Black
+        ) {
+            if (loggedIn) {
+                MainTabs(
+                    ctx = ctx,
+                    onLogout = {
+                        ApiClient.logout(ctx)
+                        loggedIn = false
+                    }
+                )
+            } else {
+                Login { loggedIn = true }
             }
         }
     }
 }
 
-
 @Composable
-fun Bg(
+private fun Page(
+    modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit
 ) {
-
-    Box(
-        modifier = Modifier
+    Column(
+        modifier = modifier
             .fillMaxSize()
-            .background(Background)
-    ) {
-
-        Image(
-            painter = androidx.compose.ui.res.painterResource(
-                com.robo.reseller.R.drawable.robo_logo
-            ),
-            contentDescription = null,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 170.dp)
-                .alpha(0.055f),
-            contentScale = ContentScale.Fit
-        )
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(
-                    rememberScrollState()
-                )
-                .padding(
-                    horizontal = 16.dp,
-                    vertical = 8.dp
-                ),
-            content = content
-        )
-    }
-}
-
-
-@Composable
-fun Header(
-    compact: Boolean = true
-) {
-
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-
-        Image(
-            painter = androidx.compose.ui.res.painterResource(
-                com.robo.reseller.R.drawable.robo_logo
-            ),
-            contentDescription = null,
-            modifier = Modifier
-                .width(
-                    if (compact) 150.dp else 245.dp
-                )
-                .height(
-                    if (compact) 60.dp else 100.dp
-                ),
-            contentScale = ContentScale.Fit
-        )
-
-        if (!compact) {
-
-            Text(
-                text = "RESELLER PORTAL",
-                fontSize = 11.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = BrightBlue,
-                letterSpacing = 3.sp
-            )
-        }
-    }
-}
-
-
-@Composable
-fun CardBox(
-    content: @Composable ColumnScope.() -> Unit
-) {
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(
-                RoundedCornerShape(18.dp)
-            )
-            .background(Card)
-            .border(
-                width = 1.dp,
-                color = Blue,
-                shape = RoundedCornerShape(18.dp)
-            )
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+            .background(Black)
+            .verticalScroll(rememberScrollState())
+            .imePadding()
+            .padding(horizontal = 20.dp, vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
         content = content
     )
 }
 
+@Composable
+private fun Section(
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(SurfaceDark)
+            .border(1.dp, BorderGray, RoundedCornerShape(12.dp))
+            .padding(15.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+        content = content
+    )
+}
 
 @Composable
-fun Login(
-    onLogin: () -> Unit
+private fun Heading(text: String) {
+    Text(
+        text = text,
+        fontSize = 21.sp,
+        fontWeight = FontWeight.SemiBold,
+        color = White
+    )
+}
+
+@Composable
+private fun Secondary(text: String) {
+    Text(
+        text = text,
+        fontSize = 13.sp,
+        color = Gray,
+        lineHeight = 19.sp
+    )
+}
+
+@Composable
+private fun PrimaryButton(
+    text: String,
+    enabled: Boolean = true,
+    onClick: () -> Unit
 ) {
-
-    var username by remember {
-        mutableStateOf("")
-    }
-
-    var password by remember {
-        mutableStateOf("")
-    }
-
-    var error by remember {
-        mutableStateOf("")
-    }
-
-    var loading by remember {
-        mutableStateOf(false)
-    }
-
-    val scope = rememberCoroutineScope()
-    val context = LocalContext.current
-
-    Bg {
-
-        Spacer(
-            modifier = Modifier.height(25.dp)
+    Button(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = Modifier.heightIn(min = 44.dp),
+        shape = RoundedCornerShape(8.dp),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Blue,
+            contentColor = White,
+            disabledContainerColor = Color(0xFF30343A),
+            disabledContentColor = Gray
         )
+    ) {
+        Text(text, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+    }
+}
 
-        Header(
-            compact = false
-        )
+@Composable
+private fun QuietButton(
+    text: String,
+    onClick: () -> Unit
+) {
+    OutlinedButton(
+        onClick = onClick,
+        shape = RoundedCornerShape(8.dp),
+        border = ButtonDefaults.outlinedButtonBorder(enabled = true).copy(
+            brush = androidx.compose.ui.graphics.SolidColor(BorderGray)
+        ),
+        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+    ) {
+        Text(text, color = White, fontSize = 12.sp)
+    }
+}
 
-        Spacer(
-            modifier = Modifier.height(20.dp)
-        )
-
-        CardBox {
-
-            Text(
-                text = "WELCOME BACK",
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Bold,
-                color = BrightBlue,
-                letterSpacing = 2.sp
-            )
-
-            OutlinedTextField(
-                value = username,
-                onValueChange = {
-                    username = it
-                },
-                label = {
-                    Text("Username")
-                },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-                colors = fieldColors()
-            )
-
-            OutlinedTextField(
-                value = password,
-                onValueChange = {
-                    password = it
-                },
-                label = {
-                    Text("Password")
-                },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-                visualTransformation =
-                    PasswordVisualTransformation(),
-                colors = fieldColors()
-            )
-
-            if (error.isNotEmpty()) {
-
-                Text(
-                    text = error,
-                    color = Color.White,
-                    fontSize = 13.sp
-                )
-            }
-
-            Button(
-                onClick = {
-
-                    scope.launch {
-
-                        loading = true
-                        error = ""
-
-                        try {
-
-                            val user = ApiClient.login(
-                                context,
-                                username,
-                                password
-                            )
-
-                            if (
-                                user.role.lowercase(Locale.US)
-                                    != "reseller"
-                            ) {
-
-                                ApiClient.logout(context)
-
-                                throw Exception(
-                                    "Please sign in with a reseller account."
-                                )
-                            }
-
-                            onLogin()
-
-                        } catch (e: Exception) {
-
-                            error =
-                                e.message ?: "Login failed"
-
-                        } finally {
-
-                            loading = false
-                        }
-                    }
-                },
-                enabled =
-                    username.isNotBlank() &&
-                    password.isNotBlank() &&
-                    !loading,
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Blue
-                ),
-                shape = RoundedCornerShape(14.dp)
-            ) {
-
-                if (loading) {
-
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(18.dp),
-                        color = Color.White
-                    )
-
-                } else {
-
-                    Spacer(
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
-
-                Spacer(
-                    modifier = Modifier.width(10.dp)
-                )
-
-                Text(
-                    text =
-                        if (loading) {
-                            "SIGNING IN..."
-                        } else {
-                            "SIGN IN"
-                        },
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.2.sp
-                )
-            }
-        }
-
-        Spacer(
-            modifier = Modifier.height(25.dp)
-        )
-
+@Composable
+private fun ErrorText(message: String) {
+    if (message.isNotBlank()) {
         Text(
-            text = "SECURE ACCESS • ROBO ANDROID",
-            fontSize = 10.sp,
-            color = MutedWhite,
-            letterSpacing = 1.5.sp
+            text = message,
+            color = Color(0xFFFF8585),
+            fontSize = 13.sp,
+            lineHeight = 19.sp
         )
     }
 }
 
-
-/*
- * IMPORTANT:
- * OutlinedTextFieldDefaults.colors() is composable
- * in the current Material3 version.
- */
 @Composable
-private fun fieldColors() =
-    OutlinedTextFieldDefaults.colors(
-        focusedBorderColor = BrightBlue,
-        unfocusedBorderColor = Blue,
-        focusedTextColor = Color.White,
-        unfocusedTextColor = Color.White,
-        focusedLabelColor = BrightBlue,
-        unfocusedLabelColor = MutedWhite
-    )
+private fun LoadingLine() {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        CircularProgressIndicator(
+            modifier = Modifier.size(20.dp),
+            color = Blue,
+            strokeWidth = 2.dp
+        )
+        Spacer(Modifier.width(10.dp))
+        Secondary("Loading...")
+    }
+}
 
+@Composable
+private fun TelegramSection(
+    title: String,
+    subtitle: String,
+    url: String
+) {
+    val context = LocalContext.current
+
+    Section(
+        modifier = Modifier.clickable {
+            context.startActivity(
+                Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            )
+        }
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Text(title, color = White, fontWeight = FontWeight.SemiBold)
+                Spacer(Modifier.height(4.dp))
+                Secondary(subtitle)
+            }
+            Icon(
+                imageVector = Icons.Default.OpenInNew,
+                contentDescription = "Open link",
+                tint = Blue
+            )
+        }
+    }
+}
+
+@Composable
+fun Login(onLogin: () -> Unit) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
+    var username by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var error by remember { mutableStateOf("") }
+    var loading by remember { mutableStateOf(false) }
+
+    Page(
+        modifier = Modifier
+            .fillMaxSize()
+            .imePadding()
+    ) {
+        Spacer(Modifier.height(28.dp))
+
+        Text(
+            "ROBO",
+            fontSize = 34.sp,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 2.sp,
+            color = White
+        )
+        Text("RESELLER PORTAL", color = Blue, fontSize = 11.sp, letterSpacing = 2.sp)
+
+        Spacer(Modifier.height(18.dp))
+
+        Heading("Welcome back")
+        Secondary("Sign in to access your reseller account.")
+
+        Section {
+            Text("USERNAME", color = Gray, fontSize = 11.sp)
+            OutlinedTextField(
+                value = username,
+                onValueChange = { username = it; error = "" },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                placeholder = { Text("Enter username", color = Gray) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                shape = RoundedCornerShape(8.dp),
+                colors = loginFieldColors()
+            )
+
+            Text("PASSWORD", color = Gray, fontSize = 11.sp)
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it; error = "" },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                placeholder = { Text("Enter password", color = Gray) },
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                shape = RoundedCornerShape(8.dp),
+                colors = loginFieldColors()
+            )
+
+            ErrorText(error)
+
+            PrimaryButton(
+                text = if (loading) "SIGNING IN..." else "LOGIN",
+                enabled = username.isNotBlank() &&
+                    password.isNotBlank() && !loading,
+                onClick = {
+                    scope.launch {
+                        loading = true
+                        error = ""
+                        try {
+                            val user = ApiClient.login(context, username.trim(), password)
+                            if (user.role.lowercase(Locale.US) != "reseller") {
+                                ApiClient.logout(context)
+                                throw Exception("Please sign in with a reseller account.")
+                            }
+                            onLogin()
+                        } catch (e: Exception) {
+                            error = e.message ?: "Login failed. Please try again."
+                        } finally {
+                            loading = false
+                        }
+                    }
+                }
+            )
+        }
+
+        Spacer(Modifier.height(8.dp))
+
+        Text(
+            "Don't have a username and password?",
+            color = White,
+            fontWeight = FontWeight.Medium,
+            fontSize = 14.sp
+        )
+        Secondary(
+            "Contact the admin to get your reseller account and password. " +
+                "You can also get keys at affordable prices."
+        )
+
+        Text(
+            "CONTACT ADMIN  ↗",
+            color = Blue,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier
+                .clip(RoundedCornerShape(6.dp))
+                .clickable {
+                    context.startActivity(
+                        Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/robomods"))
+                    )
+                }
+                .padding(vertical = 10.dp, horizontal = 4.dp)
+        )
+        Spacer(Modifier.height(20.dp))
+    }
+}
+
+@Composable
+private fun loginFieldColors() = OutlinedTextFieldDefaults.colors(
+    focusedBorderColor = Blue,
+    unfocusedBorderColor = BorderGray,
+    focusedTextColor = White,
+    unfocusedTextColor = White,
+    cursorColor = Blue,
+    focusedLabelColor = Blue,
+    unfocusedLabelColor = Gray,
+    focusedContainerColor = SurfaceLight,
+    unfocusedContainerColor = SurfaceLight
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -432,25 +374,18 @@ fun MainTabs(
     ctx: Context,
     onLogout: () -> Unit
 ) {
+    var tab by remember { mutableIntStateOf(0) }
+    var username by remember { mutableStateOf("") }
 
-    var tab by remember {
-        mutableIntStateOf(0)
+    LaunchedEffect(Unit) {
+        try {
+            username = ApiClient.me().username
+        } catch (_: Exception) {
+            username = ""
+        }
     }
 
-    val titles = listOf(
-        "ROBO ANDROID",
-        "PRODUCTS",
-        "MY KEYS",
-        "UPDATES"
-    )
-
-    val labels = listOf(
-        "Home",
-        "Products",
-        "My Keys",
-        "Updates"
-    )
-
+    val labels = listOf("Home", "Products", "My Keys", "Updates")
     val icons = listOf(
         Icons.Default.Home,
         Icons.Default.GridView,
@@ -459,1060 +394,436 @@ fun MainTabs(
     )
 
     Scaffold(
-        containerColor = Background,
-
+        containerColor = Black,
         topBar = {
-
-            CenterAlignedTopAppBar(
+            TopAppBar(
                 title = {
-
                     Text(
-                        text = titles[tab],
-                        fontWeight = FontWeight.Bold
+                        "ROBO",
+                        color = White,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 2.sp
                     )
                 },
-
-                colors =
-                    TopAppBarDefaults
-                        .centerAlignedTopAppBarColors(
-                            containerColor = Background,
-                            titleContentColor = Color.White
+                actions = {
+                    if (username.isNotBlank()) {
+                        Text(
+                            username,
+                            color = Gray,
+                            fontSize = 12.sp,
+                            maxLines = 1
                         )
+                        Spacer(Modifier.width(4.dp))
+                    }
+                    IconButton(onClick = onLogout) {
+                        Icon(Icons.Default.Logout, "Logout", tint = Gray)
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Black,
+                    titleContentColor = White
+                )
             )
         },
-
         bottomBar = {
-
             NavigationBar(
-                containerColor = Color.Black
+                containerColor = Black,
+                contentColor = White,
+                tonalElevation = 0.dp
             ) {
-
-                icons.forEachIndexed { index, icon ->
-
+                labels.forEachIndexed { index, label ->
                     NavigationBarItem(
                         selected = tab == index,
-
-                        onClick = {
-                            tab = index
-                        },
-
+                        onClick = { tab = index },
                         icon = {
-
-                            androidx.compose.material3.Icon(
-                                imageVector = icon,
-                                contentDescription =
-                                    labels[index]
+                            Icon(
+                                icons[index],
+                                contentDescription = label,
+                                modifier = Modifier.size(20.dp)
                             )
                         },
-
-                        label = {
-                            Text(labels[index])
-                        },
-
-                        colors =
-                            NavigationBarItemDefaults.colors(
-                                selectedIconColor =
-                                    BrightBlue,
-                                selectedTextColor =
-                                    BrightBlue,
-                                unselectedIconColor =
-                                    MutedWhite,
-                                unselectedTextColor =
-                                    MutedWhite,
-                                indicatorColor =
-                                    Card
-                            )
+                        label = { Text(label, fontSize = 10.sp) },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = Blue,
+                            selectedTextColor = Blue,
+                            unselectedIconColor = Gray,
+                            unselectedTextColor = Gray,
+                            indicatorColor = SurfaceLight
+                        )
                     )
                 }
             }
         }
-    ) { paddingValues ->
-
+    ) { padding ->
         Box(
-            modifier =
-                Modifier.padding(paddingValues)
+            Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .background(Black)
         ) {
-
             when (tab) {
-
-                0 -> Home(
-                    ctx = ctx,
-                    onLogout = onLogout
-                )
-
-                1 -> Products(
-                    ctx = ctx
-                )
-
+                0 -> Home(ctx)
+                1 -> Products(ctx)
                 2 -> Keys()
-
-                3 -> Updates(
-                    ctx = ctx
-                )
+                3 -> Updates(ctx)
             }
         }
     }
 }
 
-
 @Composable
-fun Home(
-    ctx: Context,
-    onLogout: () -> Unit
-) {
-
-    var user by remember {
-        mutableStateOf<ApiUser?>(null)
-    }
-
-    var error by remember {
-        mutableStateOf("")
-    }
+fun Home(ctx: Context) {
+    var user by remember { mutableStateOf<ApiUser?>(null) }
+    var products by remember { mutableStateOf<List<Product>>(emptyList()) }
+    var keys by remember { mutableStateOf<List<KeyRecord>>(emptyList()) }
+    var error by remember { mutableStateOf("") }
+    var loading by remember { mutableStateOf(true) }
 
     LaunchedEffect(Unit) {
-
+        loading = true
         try {
-
             user = ApiClient.me()
-
+            products = ApiClient.products()
+            keys = ApiClient.keys()
         } catch (e: Exception) {
-
-            error =
-                e.message ?: "Request failed"
+            error = e.message ?: "Could not load account data."
+        } finally {
+            loading = false
         }
     }
 
-    Bg {
+    Page {
+        Heading("Dashboard")
+        Secondary("Your reseller account at a glance.")
 
-        Header()
+        ErrorText(error)
+        if (loading) LoadingLine()
 
-        Spacer(
-            modifier = Modifier.height(12.dp)
-        )
-
-        if (user != null) {
-
-            val currentUser = user!!
-
-            CardBox {
-
-                Text(
-                    text = "ACCOUNT OVERVIEW",
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = BrightBlue,
-                    letterSpacing = 1.6.sp
-                )
-
-                Row(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-
-                    Text(
-                        text = "Username",
-                        color = MutedWhite
-                    )
-
-                    Spacer(
-                        modifier = Modifier.weight(1f)
-                    )
-
-                    Text(
-                        text = currentUser.username
-                    )
-                }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-
-                    Text(
-                        text = "Role",
-                        color = MutedWhite
-                    )
-
-                    Spacer(
-                        modifier = Modifier.weight(1f)
-                    )
-
-                    Text(
-                        text =
-                            currentUser.role
-                                .replaceFirstChar {
-                                    it.uppercase()
-                                }
-                    )
-                }
-
-                HorizontalDivider(
-                    color = Blue
-                )
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment =
-                        Alignment.CenterVertically
-                ) {
-
-                    Column {
-
+        user?.let {
+            Section {
+                Secondary("USERNAME")
+                Text(it.username, color = White, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+                HorizontalDivider(color = BorderGray)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Secondary("ACCOUNT STATUS")
+                        Text(it.role.replaceFirstChar { c -> c.uppercase() }, color = Green)
+                    }
+                    Column(horizontalAlignment = Alignment.End) {
+                        Secondary("BALANCE")
                         Text(
-                            text = "AVAILABLE BALANCE",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MutedWhite
-                        )
-
-                        Text(
-                            text = String.format(
-                                Locale.US,
-                                "$%.2f",
-                                currentUser.balance
-                            ),
-                            fontSize = 32.sp,
-                            fontWeight = FontWeight.Bold
+                            "$" + String.format(Locale.US, "%.2f", it.balance),
+                            color = White,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.SemiBold
                         )
                     }
-
-                    Spacer(
-                        modifier = Modifier.weight(1f)
-                    )
-
-                    androidx.compose.material3.Icon(
-                        imageVector =
-                            Icons.Default.AccountBalanceWallet,
-                        contentDescription = null,
-                        tint = BrightBlue,
-                        modifier = Modifier.size(32.dp)
-                    )
                 }
             }
+        }
 
-        } else if (error.isNotEmpty()) {
-
-            CardBox {
-
-                Text(
-                    text = error,
-                    color = Color.White
-                )
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Section(Modifier.weight(1f)) {
+                Secondary("PRODUCTS")
+                Text(products.size.toString(), fontSize = 26.sp, color = White, fontWeight = FontWeight.SemiBold)
             }
+            Section(Modifier.weight(1f)) {
+                Secondary("MY KEYS")
+                Text(keys.size.toString(), fontSize = 26.sp, color = White, fontWeight = FontWeight.SemiBold)
+            }
+        }
 
+        Heading("Recent keys")
+        if (keys.isEmpty() && !loading) {
+            Section { Secondary("Your purchased keys will appear here.") }
         } else {
-
-            CircularProgressIndicator(
-                color = BrightBlue
-            )
-        }
-
-        Spacer(
-            modifier = Modifier.height(18.dp)
-        )
-
-        CardBox {
-
-            Text(
-                text = "QUICK ACCESS",
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
-                color = BrightBlue,
-                letterSpacing = 1.6.sp
-            )
-
-            Text(
-                text =
-                    "Manage your products, keys and latest updates from one place."
-            )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment =
-                    Alignment.CenterVertically
-            ) {
-
-                androidx.compose.material3.Icon(
-                    imageVector =
-                        Icons.Default.GridView,
-                    contentDescription = null,
-                    tint = BrightBlue
-                )
-
-                Spacer(
-                    modifier = Modifier.width(8.dp)
-                )
-
-                Text(
-                    text = "Products",
-                    color = BrightBlue
-                )
-
-                Spacer(
-                    modifier = Modifier.weight(1f)
-                )
-
-                androidx.compose.material3.Icon(
-                    imageVector =
-                        Icons.Default.Key,
-                    contentDescription = null,
-                    tint = BrightBlue
-                )
-
-                Spacer(
-                    modifier = Modifier.width(8.dp)
-                )
-
-                Text(
-                    text = "Keys",
-                    color = BrightBlue
-                )
+            keys.take(3).forEach { key ->
+                Section {
+                    Text(key.category_name, color = White, fontWeight = FontWeight.Medium)
+                    Text(
+                        key.key_value,
+                        color = Blue,
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 13.sp
+                    )
+                    Secondary("${key.product_name} · ${key.status}")
+                }
             }
         }
 
-        Spacer(
-            modifier = Modifier.height(12.dp)
+        TelegramSection(
+            title = "ROBO Resellers Channel",
+            subtitle = "Join us on Telegram",
+            url = "https://t.me/roboresellers"
         )
-
-        OutlinedButton(
-            onClick = onLogout,
-            modifier = Modifier.fillMaxWidth(),
-            border = BorderStroke(
-                width = 1.dp,
-                color = Blue
-            )
-        ) {
-
-            androidx.compose.material3.Icon(
-                imageVector =
-                    Icons.Default.Logout,
-                contentDescription = null
-            )
-
-            Spacer(
-                modifier = Modifier.width(8.dp)
-            )
-
-            Text(
-                text = "Log Out"
-            )
-        }
     }
 }
 
-
 @Composable
-fun Products(
-    ctx: Context
-) {
-
-    var products by remember {
-        mutableStateOf<List<Product>>(
-            emptyList()
-        )
-    }
-
-    var error by remember {
-        mutableStateOf("")
-    }
-
-    var busy by remember {
-        mutableStateOf(false)
-    }
-
-    var dialog by remember {
-        mutableStateOf<String?>(null)
-    }
-
+fun Products(ctx: Context) {
+    var products by remember { mutableStateOf<List<Product>>(emptyList()) }
+    var loading by remember { mutableStateOf(true) }
+    var error by remember { mutableStateOf("") }
+    var buyingId by remember { mutableStateOf<String?>(null) }
+    var purchasedKey by remember { mutableStateOf("") }
+    var purchaseMessage by remember { mutableStateOf("") }
+    var refresh by remember { mutableIntStateOf(0) }
     val scope = rememberCoroutineScope()
 
-    LaunchedEffect(Unit) {
-
-        busy = true
-
+    LaunchedEffect(refresh) {
+        loading = true
+        error = ""
         try {
-
-            products =
-                ApiClient.products()
-
-            error = ""
-
+            products = ApiClient.products()
         } catch (e: Exception) {
-
-            error =
-                e.message ?: "Request failed"
-
+            error = e.message ?: "Could not load products."
         } finally {
-
-            busy = false
+            loading = false
         }
     }
 
-    Bg {
+    Page {
+        Heading("Products")
+        Secondary("Choose a product and category to get your key.")
 
-        Header()
+        if (loading) LoadingLine()
+        ErrorText(error)
 
-        Spacer(
-            modifier = Modifier.height(12.dp)
-        )
-
-        if (error.isNotEmpty()) {
-
-            CardBox {
-
-                Text(
-                    text = error,
-                    color = Color.White
-                )
-            }
+        if (!loading && error.isEmpty() && products.isEmpty()) {
+            Section { Secondary("No products are currently available.") }
         }
 
-        if (
-            products.isEmpty() &&
-            error.isEmpty() &&
-            !busy
-        ) {
-
-            CardBox {
-
-                androidx.compose.material3.Icon(
-                    imageVector =
-                        Icons.Default.GridView,
-                    contentDescription = null,
-                    tint = BrightBlue,
-                    modifier = Modifier.size(38.dp)
-                )
-
+        if (purchasedKey.isNotBlank()) {
+            Section {
                 Text(
-                    text = "NO PRODUCTS",
-                    fontWeight = FontWeight.Bold
+                    "Congratulations, We are good to go.",
+                    color = Green,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 16.sp
                 )
-
+                Text("You purchased a key.", color = White)
                 Text(
-                    text =
-                        "Products will appear here when available.",
-                    color = MutedWhite
+                    purchasedKey,
+                    color = White,
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 14.sp
                 )
+                PrimaryButton("COPY KEY") {
+                    val clipboard = ctx.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                    clipboard.setPrimaryClip(
+                        ClipData.newPlainText("Purchased key", purchasedKey)
+                    )
+                    purchaseMessage = "Key copied to clipboard."
+                }
+                Secondary(purchaseMessage)
             }
         }
 
         products.forEach { product ->
-
-            CardBox {
-
+            Section {
                 Text(
-                    text = product.name,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
+                    product.name,
+                    color = White,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.SemiBold
                 )
+                product.description?.takeIf { it.isNotBlank() }?.let {
+                    Secondary(it)
+                }
+                product.version?.takeIf { it.isNotBlank() }?.let {
+                    Secondary("Version $it")
+                }
 
-                product.description
-                    ?.takeIf {
-                        it.isNotBlank()
-                    }
-                    ?.let {
-
-                        Text(
-                            text = it,
-                            fontSize = 14.sp,
-                            color = MutedWhite
-                        )
-                    }
-
-                product.version
-                    ?.takeIf {
-                        it.isNotBlank()
-                    }
-                    ?.let {
-
-                        Text(
-                            text = "VERSION  $it",
-                            fontSize = 12.sp,
-                            fontWeight =
-                                FontWeight.Bold,
-                            color = BrightBlue
-                        )
-                    }
+                if (product.categories.isEmpty()) {
+                    Secondary("No purchase categories are currently available.")
+                }
 
                 product.categories.forEach { category ->
-
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(
-                                RoundedCornerShape(14.dp)
-                            )
-                            .background(Color.Black)
-                            .border(
-                                width = 1.dp,
-                                color = Blue,
-                                shape =
-                                    RoundedCornerShape(14.dp)
-                            )
-                            .padding(12.dp),
-
-                        verticalArrangement =
-                            Arrangement.spacedBy(
-                                10.dp
-                            )
+                    HorizontalDivider(color = BorderGray)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-
-                        Row(
-                            modifier =
-                                Modifier.fillMaxWidth()
-                        ) {
-
-                            Column {
-
-                                Text(
-                                    text =
-                                        category.name,
-                                    fontWeight =
-                                        FontWeight.Bold
-                                )
-
-                                Text(
-                                    text =
-                                        "${category.available_count} available",
-                                    fontSize = 12.sp,
-                                    color = MutedWhite
-                                )
-                            }
-
-                            Spacer(
-                                modifier =
-                                    Modifier.weight(1f)
+                        Column(Modifier.weight(1f)) {
+                            Text(category.name, color = White, fontWeight = FontWeight.Medium)
+                            val price = "$" + String.format(
+                                Locale.US,
+                                "%.2f",
+                                category.price_cents / 100.0
                             )
-
-                            Text(
-                                text = String.format(
-                                    Locale.US,
-                                    "$%.2f",
-                                    category.price_cents /
-                                        100.0
-                                ),
-                                fontWeight =
-                                    FontWeight.Bold,
-                                color = BrightBlue
-                            )
+                            Secondary("$price · ${category.available_count} available")
                         }
 
-                        Button(
-                            onClick = {
-
-                                scope.launch {
-
-                                    busy = true
-
-                                    try {
-
-                                        val result =
-                                            ApiClient.getKey(
-                                                category.id
-                                            )
-
-                                        dialog =
-                                            "KEY\n" +
-                                            result.key +
-                                            "\nNew balance: " +
-                                            String.format(
-                                                Locale.US,
-                                                "$%.2f",
-                                                result.balance
-                                            )
-
-                                        products =
-                                            ApiClient.products()
-
-                                    } catch (e: Exception) {
-
-                                        dialog =
-                                            e.message
-                                                ?: "Purchase failed"
-
-                                    } finally {
-
-                                        busy = false
-                                    }
-                                }
-                            },
-
-                            enabled =
-                                category.available_count > 0 &&
-                                !busy,
-
-                            modifier =
-                                Modifier.fillMaxWidth(),
-
-                            colors =
-                                ButtonDefaults.buttonColors(
-                                    containerColor = Blue
-                                ),
-
-                            shape =
-                                RoundedCornerShape(12.dp)
+                        PrimaryButton(
+                            text = if (buyingId == category.id) "PLEASE WAIT" else "GET KEY",
+                            enabled = buyingId == null && category.available_count > 0
                         ) {
-
-                            androidx.compose.material3.Icon(
-                                imageVector =
-                                    Icons.Default.Key,
-                                contentDescription =
-                                    null
-                            )
-
-                            Spacer(
-                                modifier =
-                                    Modifier.width(8.dp)
-                            )
-
-                            Text(
-                                text = "GET KEY",
-                                fontWeight =
-                                    FontWeight.Bold,
-                                letterSpacing = 1.sp
-                            )
+                            scope.launch {
+                                buyingId = category.id
+                                error = ""
+                                purchasedKey = ""
+                                purchaseMessage = ""
+                                try {
+                                    val result = ApiClient.getKey(category.id)
+                                    purchasedKey = result.key
+                                    purchaseMessage = "Purchase completed successfully."
+                                    refresh++
+                                } catch (e: Exception) {
+                                    error = e.message ?: "Purchase failed. Please try again."
+                                } finally {
+                                    buyingId = null
+                                }
+                            }
                         }
                     }
                 }
-
-                product.download_url
-                    ?.takeIf {
-                        it.isNotBlank()
-                    }
-                    ?.let { url ->
-
-                        TextButton(
-                            onClick = {
-
-                                ctx.startActivity(
-                                    Intent(
-                                        Intent.ACTION_VIEW,
-                                        Uri.parse(url)
-                                    )
-                                )
-                            }
-                        ) {
-
-                            androidx.compose.material3.Icon(
-                                imageVector =
-                                    Icons.Default.Download,
-                                contentDescription =
-                                    null
-                            )
-
-                            Spacer(
-                                modifier =
-                                    Modifier.width(5.dp)
-                            )
-
-                            Text(
-                                text =
-                                    "Product Download",
-                                color = BrightBlue
-                            )
-                        }
-                    }
             }
-        }
-
-        if (busy) {
-
-            Spacer(
-                modifier = Modifier.height(12.dp)
-            )
-
-            CircularProgressIndicator(
-                color = BrightBlue
-            )
-        }
-
-        dialog?.let { message ->
-
-            AlertDialog(
-
-                onDismissRequest = {
-                    dialog = null
-                },
-
-                confirmButton = {
-
-                    TextButton(
-                        onClick = {
-                            dialog = null
-                        }
-                    ) {
-
-                        Text("OK")
-                    }
-                },
-
-                text = {
-
-                    Text(message)
-                },
-
-                containerColor = Card
-            )
         }
     }
 }
-
 
 @Composable
 fun Keys() {
+    var keys by remember { mutableStateOf<List<KeyRecord>>(emptyList()) }
+    var loading by remember { mutableStateOf(true) }
+    var error by remember { mutableStateOf("") }
+    var refresh by remember { mutableIntStateOf(0) }
 
-    var keys by remember {
-        mutableStateOf<List<KeyRecord>>(
-            emptyList()
-        )
-    }
-
-    var error by remember {
-        mutableStateOf("")
-    }
-
-    LaunchedEffect(Unit) {
-
+    LaunchedEffect(refresh) {
+        loading = true
+        error = ""
         try {
-
-            keys =
-                ApiClient.keys()
-
+            keys = ApiClient.keys()
         } catch (e: Exception) {
-
-            error =
-                e.message ?: "Request failed"
+            error = e.message ?: "Could not load keys."
+        } finally {
+            loading = false
         }
     }
 
-    Bg {
+    Page {
+        Heading("My Keys")
+        Secondary("Your purchased reseller keys.")
 
-        Header()
+        if (loading) LoadingLine()
+        ErrorText(error)
 
-        Spacer(
-            modifier = Modifier.height(12.dp)
-        )
-
-        if (error.isNotEmpty()) {
-
-            CardBox {
-
-                Text(
-                    text = error,
-                    color = Color.White
-                )
-            }
-        }
-
-        if (
-            keys.isEmpty() &&
-            error.isEmpty()
-        ) {
-
-            CardBox {
-
-                androidx.compose.material3.Icon(
-                    imageVector =
-                        Icons.Default.Key,
-                    contentDescription = null,
-                    tint = BrightBlue,
-                    modifier = Modifier.size(38.dp)
-                )
-
-                Text(
-                    text = "NO KEYS YET",
-                    fontWeight = FontWeight.Bold
-                )
-
-                Text(
-                    text =
-                        "Purchased keys will appear here.",
-                    color = MutedWhite
-                )
-            }
+        if (!loading && error.isEmpty() && keys.isEmpty()) {
+            Section { Secondary("No keys found for your account.") }
         }
 
         keys.forEach { key ->
-
-            CardBox {
-
-                Row(
-                    verticalAlignment =
-                        Alignment.CenterVertically
-                ) {
-
-                    androidx.compose.material3.Icon(
-                        imageVector =
-                            Icons.Default.Key,
-                        contentDescription =
-                            null,
-                        tint = BrightBlue
-                    )
-
-                    Spacer(
-                        modifier =
-                            Modifier.width(8.dp)
-                    )
-
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 5.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text =
-                            key.category_name
-                                .uppercase(),
-                        fontSize = 12.sp,
-                        fontWeight =
-                            FontWeight.Bold,
-                        color = BrightBlue
+                        key.category_name,
+                        color = White,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.weight(1f)
                     )
-
-                    Spacer(
-                        modifier =
-                            Modifier.weight(1f)
-                    )
-
-                    Text(
-                        text =
-                            key.status.uppercase(),
-                        fontSize = 11.sp,
-                        fontWeight =
-                            FontWeight.Bold
-                    )
+                    Text(key.status, color = Blue, fontSize = 12.sp)
                 }
 
+                Spacer(Modifier.height(8.dp))
                 Text(
-                    text = key.key_value,
-                    fontFamily =
-                        FontFamily.Monospace,
-                    fontWeight =
-                        FontWeight.SemiBold
+                    key.key_value,
+                    color = White,
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 13.sp
                 )
+                Spacer(Modifier.height(5.dp))
+                Secondary(key.product_name)
 
-                Text(
-                    text = key.product_name,
-                    fontSize = 14.sp,
-                    color = MutedWhite
+                key.issued_at?.takeIf { it.isNotBlank() }?.let {
+                    Secondary("Created: $it")
+                }
+                key.expires_at?.takeIf { it.isNotBlank() }?.let {
+                    Secondary("Expires: $it")
+                }
+
+                HorizontalDivider(
+                    modifier = Modifier.padding(top = 14.dp),
+                    color = BorderGray
                 )
-
-                key.issued_at
-                    ?.takeIf {
-                        it.isNotBlank()
-                    }
-                    ?.let {
-
-                        Text(
-                            text = "Issued: $it",
-                            fontSize = 11.sp,
-                            color = MutedWhite
-                        )
-                    }
             }
         }
     }
 }
 
-
 @Composable
-fun Updates(
-    ctx: Context
-) {
+fun Updates(ctx: Context) {
+    var updates by remember { mutableStateOf<List<PanelUpdate>>(emptyList()) }
+    var loading by remember { mutableStateOf(true) }
+    var error by remember { mutableStateOf("") }
+    var refresh by remember { mutableIntStateOf(0) }
 
-    var updates by remember {
-        mutableStateOf<List<PanelUpdate>>(
-            emptyList()
-        )
-    }
-
-    var error by remember {
-        mutableStateOf("")
-    }
-
-    LaunchedEffect(Unit) {
-
+    LaunchedEffect(refresh) {
+        loading = true
+        error = ""
         try {
-
-            updates =
-                ApiClient.updates()
-
+            updates = ApiClient.updates()
         } catch (e: Exception) {
-
-            error =
-                e.message ?: "Request failed"
+            error = e.message ?: "Could not load updates."
+        } finally {
+            loading = false
         }
     }
 
-    Bg {
+    Page {
+        Heading("Updates")
+        Secondary("Latest product releases and announcements.")
 
-        Header()
+        if (loading) LoadingLine()
+        ErrorText(error)
 
-        Spacer(
-            modifier = Modifier.height(12.dp)
-        )
-
-        if (error.isNotEmpty()) {
-
-            CardBox {
-
-                Text(
-                    text = error,
-                    color = Color.White
-                )
-            }
-        }
-
-        if (
-            updates.isEmpty() &&
-            error.isEmpty()
-        ) {
-
-            CardBox {
-
-                androidx.compose.material3.Icon(
-                    imageVector =
-                        Icons.Default.Download,
-                    contentDescription = null,
-                    tint = BrightBlue,
-                    modifier = Modifier.size(38.dp)
-                )
-
-                Text(
-                    text = "NO UPDATES",
-                    fontWeight = FontWeight.Bold
-                )
-
-                Text(
-                    text =
-                        "Published updates will appear here.",
-                    color = MutedWhite
-                )
-            }
+        if (!loading && error.isEmpty() && updates.isEmpty()) {
+            Section { Secondary("No updates have been published yet.") }
         }
 
         updates.forEach { update ->
-
-            CardBox {
-
-                Row(
-                    modifier =
-                        Modifier.fillMaxWidth(),
-                    verticalAlignment =
-                        Alignment.CenterVertically
-                ) {
-
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 5.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text =
-                            update.product_name,
-                        fontWeight =
-                            FontWeight.Bold
+                        update.product_name,
+                        color = White,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.weight(1f)
                     )
-
-                    Spacer(
-                        modifier =
-                            Modifier.weight(1f)
-                    )
-
                     if (update.is_latest == true) {
-
-                        Text(
-                            text = "LATEST",
-                            fontSize = 11.sp,
-                            fontWeight =
-                                FontWeight.Bold,
-                            color = BrightBlue,
-                            modifier = Modifier
-                                .border(
-                                    width = 1.dp,
-                                    color = BrightBlue,
-                                    shape =
-                                        RoundedCornerShape(
-                                            20.dp
-                                        )
-                                )
-                                .padding(
-                                    horizontal = 9.dp,
-                                    vertical = 5.dp
-                                )
-                        )
+                        Text("LATEST", color = Blue, fontSize = 11.sp)
                     }
                 }
 
                 Text(
-                    text =
-                        "${update.version} — ${update.title}",
-                    fontWeight =
-                        FontWeight.Bold,
-                    color = BrightBlue
+                    "${update.version} · ${update.title}",
+                    color = Blue,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Medium
                 )
 
-                update.patch_notes
-                    ?.takeIf {
-                        it.isNotBlank()
+                update.patch_notes?.takeIf { it.isNotBlank() }?.let {
+                    Secondary(it)
+                }
+                update.release_date?.takeIf { it.isNotBlank() }?.let {
+                    Secondary(it)
+                }
+
+                update.download_url?.takeIf { it.isNotBlank() }?.let { url ->
+                    QuietButton("DOWNLOAD UPDATE") {
+                        ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
                     }
-                    ?.let {
+                }
 
-                        Text(
-                            text = it
-                        )
-                    }
-
-                update.release_date
-                    ?.takeIf {
-                        it.isNotBlank()
-                    }
-                    ?.let {
-
-                        Text(
-                            text = it,
-                            fontSize = 11.sp,
-                            color = MutedWhite
-                        )
-                    }
-
-                update.download_url
-                    ?.takeIf {
-                        it.isNotBlank()
-                    }
-                    ?.let { url ->
-
-                        Button(
-                            onClick = {
-
-                                ctx.startActivity(
-                                    Intent(
-                                        Intent.ACTION_VIEW,
-                                        Uri.parse(url)
-                                    )
-                                )
-                            },
-
-                            modifier =
-                                Modifier.fillMaxWidth(),
-
-                            colors =
-                                ButtonDefaults.buttonColors(
-                                    containerColor = Blue
-                                ),
-
-                            shape =
-                                RoundedCornerShape(12.dp)
-                        ) {
-
-                            androidx.compose.material3.Icon(
-                                imageVector =
-                                    Icons.Default.Download,
-                                contentDescription =
-                                    null
-                            )
-
-                            Spacer(
-                                modifier =
-                                    Modifier.width(6.dp)
-                            )
-
-                            Text(
-                                text =
-                                    "DOWNLOAD UPDATE",
-                                fontWeight =
-                                    FontWeight.Bold
-                            )
-                        }
-                    }
+                HorizontalDivider(color = BorderGray)
             }
         }
     }
