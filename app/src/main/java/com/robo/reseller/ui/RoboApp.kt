@@ -5,6 +5,13 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -25,7 +32,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -50,9 +59,98 @@ private val Gray = Color(0xFF9A9DA5)
 private val BorderGray = Color(0xFF292C32)
 private val Green = Color(0xFF59D69A)
 
+/* ---------------------------------------------------------
+   ANIMATED STAR RAIN BACKGROUND
+   --------------------------------------------------------- */
+
+private data class FallingStar(
+    val x: Float,
+    val startY: Float,
+    val speed: Float,
+    val radius: Float,
+    val shooting: Boolean
+)
+
+@Composable
+private fun StarRainBackground(
+    modifier: Modifier = Modifier
+) {
+    val transition = rememberInfiniteTransition(label = "star-rain")
+
+    val progress by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = 5200,
+                easing = LinearEasing
+            ),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "star-progress"
+    )
+
+    val stars = remember {
+        List(64) { index ->
+            FallingStar(
+                x = ((index * 47 + 11) % 101) / 100f,
+                startY = ((index * 29 + 7) % 97) / 100f,
+                speed = 0.35f + ((index * 13) % 65) / 100f,
+                radius = 0.7f + ((index * 7) % 13) / 10f,
+                shooting = index % 11 == 0
+            )
+        }
+    }
+
+    Canvas(
+        modifier = modifier.fillMaxSize()
+    ) {
+        stars.forEachIndexed { index, star ->
+            val yFraction =
+                (star.startY + progress * star.speed) % 1f
+
+            val x = star.x * size.width
+            val y = yFraction * size.height
+
+            val tint = if (index % 4 == 0) {
+                Blue
+            } else {
+                Color(0xFFDCEBFF)
+            }
+
+            val alpha = 0.38f + ((index * 17) % 55) / 100f
+
+            if (star.shooting) {
+                drawLine(
+                    color = tint.copy(alpha = alpha * 0.65f),
+                    start = Offset(
+                        x - 8.dp.toPx(),
+                        y - 24.dp.toPx()
+                    ),
+                    end = Offset(x, y),
+                    strokeWidth = (star.radius * 1.15f).dp.toPx(),
+                    cap = StrokeCap.Round
+                )
+            }
+
+            drawCircle(
+                color = tint.copy(alpha = alpha),
+                radius = star.radius.dp.toPx(),
+                center = Offset(x, y)
+            )
+        }
+    }
+}
+
+/* ---------------------------------------------------------
+   APP ROOT
+   --------------------------------------------------------- */
+
 @Composable
 fun RoboApp(ctx: Context) {
-    var loggedIn by remember { mutableStateOf(ApiClient.loggedIn()) }
+    var loggedIn by remember {
+        mutableStateOf(ApiClient.loggedIn())
+    }
 
     MaterialTheme(
         colorScheme = darkColorScheme(
@@ -79,27 +177,43 @@ fun RoboApp(ctx: Context) {
                     }
                 )
             } else {
-                Login { loggedIn = true }
+                Login {
+                    loggedIn = true
+                }
             }
         }
     }
 }
+
+/* ---------------------------------------------------------
+   SHARED PAGE WITH ANIMATED BACKGROUND
+   --------------------------------------------------------- */
 
 @Composable
 private fun Page(
     modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    Column(
+    Box(
         modifier = modifier
             .fillMaxSize()
             .background(Black)
-            .verticalScroll(rememberScrollState())
-            .imePadding()
-            .padding(horizontal = 20.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        content = content
-    )
+    ) {
+        StarRainBackground()
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .imePadding()
+                .padding(
+                    horizontal = 20.dp,
+                    vertical = 16.dp
+                ),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            content = content
+        )
+    }
 }
 
 @Composable
@@ -111,8 +225,12 @@ private fun Section(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .background(SurfaceDark)
-            .border(1.dp, BorderGray, RoundedCornerShape(12.dp))
+            .background(SurfaceDark.copy(alpha = 0.88f))
+            .border(
+                1.dp,
+                BorderGray,
+                RoundedCornerShape(12.dp)
+            )
             .padding(15.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
         content = content
@@ -177,8 +295,12 @@ private fun QuietButton(
     OutlinedButton(
         onClick = onClick,
         shape = RoundedCornerShape(8.dp),
-        border = ButtonDefaults.outlinedButtonBorder(enabled = true).copy(
-            brush = androidx.compose.ui.graphics.SolidColor(BorderGray)
+        border = ButtonDefaults.outlinedButtonBorder(
+            enabled = true
+        ).copy(
+            brush = androidx.compose.ui.graphics.SolidColor(
+                BorderGray
+            )
         ),
         contentPadding = PaddingValues(
             horizontal = 12.dp,
@@ -237,7 +359,10 @@ private fun TelegramSection(
     Section(
         modifier = Modifier.clickable {
             context.startActivity(
-                Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse(url)
+                )
             )
         }
     ) {
@@ -267,6 +392,10 @@ private fun TelegramSection(
     }
 }
 
+/* ---------------------------------------------------------
+   LOGIN SCREEN
+   --------------------------------------------------------- */
+
 @Composable
 fun Login(onLogin: () -> Unit) {
     val context = LocalContext.current
@@ -277,11 +406,7 @@ fun Login(onLogin: () -> Unit) {
     var error by remember { mutableStateOf("") }
     var loading by remember { mutableStateOf(false) }
 
-    Page(
-        modifier = Modifier
-            .fillMaxSize()
-            .imePadding()
-    ) {
+    Page {
         Spacer(Modifier.height(28.dp))
 
         Text(
@@ -303,7 +428,9 @@ fun Login(onLogin: () -> Unit) {
 
         Heading("Welcome back")
 
-        Secondary("Sign in to access your reseller account.")
+        Secondary(
+            "Sign in to access your reseller account."
+        )
 
         Section {
             Text(
@@ -353,7 +480,8 @@ fun Login(onLogin: () -> Unit) {
                         color = Gray
                     )
                 },
-                visualTransformation = PasswordVisualTransformation(),
+                visualTransformation =
+                    PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Password
                 ),
@@ -364,42 +492,46 @@ fun Login(onLogin: () -> Unit) {
             ErrorText(error)
 
             PrimaryButton(
-                text = if (loading) "SIGNING IN..." else "LOGIN",
+                text = if (loading) {
+                    "SIGNING IN..."
+                } else {
+                    "LOGIN"
+                },
                 enabled = username.isNotBlank() &&
                     password.isNotBlank() &&
-                    !loading,
-                onClick = {
-                    scope.launch {
-                        loading = true
-                        error = ""
+                    !loading
+            ) {
+                scope.launch {
+                    loading = true
+                    error = ""
 
-                        try {
-                            val user = ApiClient.login(
-                                context,
-                                username.trim(),
-                                password
+                    try {
+                        val user = ApiClient.login(
+                            context,
+                            username.trim(),
+                            password
+                        )
+
+                        if (
+                            user.role.lowercase(Locale.US) !=
+                            "reseller"
+                        ) {
+                            ApiClient.logout(context)
+
+                            throw Exception(
+                                "Please sign in with a reseller account."
                             )
-
-                            if (
-                                user.role.lowercase(Locale.US) != "reseller"
-                            ) {
-                                ApiClient.logout(context)
-
-                                throw Exception(
-                                    "Please sign in with a reseller account."
-                                )
-                            }
-
-                            onLogin()
-                        } catch (e: Exception) {
-                            error = e.message
-                                ?: "Login failed. Please try again."
-                        } finally {
-                            loading = false
                         }
+
+                        onLogin()
+                    } catch (e: Exception) {
+                        error = e.message
+                            ?: "Login failed. Please try again."
+                    } finally {
+                        loading = false
                     }
                 }
-            )
+            }
         }
 
         Spacer(Modifier.height(8.dp))
@@ -412,8 +544,8 @@ fun Login(onLogin: () -> Unit) {
         )
 
         Secondary(
-            "Contact the admin to get your reseller account and password. " +
-                "You can also get keys at affordable prices."
+            "Contact the admin to get your reseller account " +
+                "and password. You can also get keys at affordable prices."
         )
 
         Text(
@@ -442,17 +574,22 @@ fun Login(onLogin: () -> Unit) {
 }
 
 @Composable
-private fun loginFieldColors() = OutlinedTextFieldDefaults.colors(
-    focusedBorderColor = Blue,
-    unfocusedBorderColor = BorderGray,
-    focusedTextColor = White,
-    unfocusedTextColor = White,
-    cursorColor = Blue,
-    focusedLabelColor = Blue,
-    unfocusedLabelColor = Gray,
-    focusedContainerColor = SurfaceLight,
-    unfocusedContainerColor = SurfaceLight
-)
+private fun loginFieldColors() =
+    OutlinedTextFieldDefaults.colors(
+        focusedBorderColor = Blue,
+        unfocusedBorderColor = BorderGray,
+        focusedTextColor = White,
+        unfocusedTextColor = White,
+        cursorColor = Blue,
+        focusedLabelColor = Blue,
+        unfocusedLabelColor = Gray,
+        focusedContainerColor = SurfaceLight,
+        unfocusedContainerColor = SurfaceLight
+    )
+
+/* ---------------------------------------------------------
+   MAIN NAVIGATION
+   --------------------------------------------------------- */
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -576,6 +713,10 @@ fun MainTabs(
     }
 }
 
+/* ---------------------------------------------------------
+   HOME / DASHBOARD
+   --------------------------------------------------------- */
+
 @Composable
 fun Home(ctx: Context) {
     var user by remember {
@@ -590,13 +731,8 @@ fun Home(ctx: Context) {
         mutableStateOf<List<KeyRecord>>(emptyList())
     }
 
-    var error by remember {
-        mutableStateOf("")
-    }
-
-    var loading by remember {
-        mutableStateOf(true)
-    }
+    var error by remember { mutableStateOf("") }
+    var loading by remember { mutableStateOf(true) }
 
     LaunchedEffect(Unit) {
         loading = true
@@ -623,12 +759,12 @@ fun Home(ctx: Context) {
             LoadingLine()
         }
 
-        user?.let {
+        user?.let { account ->
             Section {
                 Secondary("USERNAME")
 
                 Text(
-                    it.username,
+                    account.username,
                     color = White,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.SemiBold
@@ -645,8 +781,8 @@ fun Home(ctx: Context) {
                         Secondary("ACCOUNT STATUS")
 
                         Text(
-                            it.role.replaceFirstChar { c ->
-                                c.uppercase()
+                            account.role.replaceFirstChar {
+                                it.uppercase()
                             },
                             color = Green
                         )
@@ -661,7 +797,7 @@ fun Home(ctx: Context) {
                             "$" + String.format(
                                 Locale.US,
                                 "%.2f",
-                                it.balance
+                                account.balance
                             ),
                             color = White,
                             fontSize = 18.sp,
@@ -706,7 +842,9 @@ fun Home(ctx: Context) {
 
         if (keys.isEmpty() && !loading) {
             Section {
-                Secondary("Your purchased keys will appear here.")
+                Secondary(
+                    "Your purchased keys will appear here."
+                )
             }
         } else {
             keys.take(3).forEach { key ->
@@ -739,35 +877,22 @@ fun Home(ctx: Context) {
     }
 }
 
+/* ---------------------------------------------------------
+   PRODUCTS AND KEY PURCHASE
+   --------------------------------------------------------- */
+
 @Composable
 fun Products(ctx: Context) {
     var products by remember {
         mutableStateOf<List<Product>>(emptyList())
     }
 
-    var loading by remember {
-        mutableStateOf(true)
-    }
-
-    var error by remember {
-        mutableStateOf("")
-    }
-
-    var buyingId by remember {
-        mutableStateOf<String?>(null)
-    }
-
-    var purchasedKey by remember {
-        mutableStateOf("")
-    }
-
-    var purchaseMessage by remember {
-        mutableStateOf("")
-    }
-
-    var refresh by remember {
-        mutableIntStateOf(0)
-    }
+    var loading by remember { mutableStateOf(true) }
+    var error by remember { mutableStateOf("") }
+    var buyingId by remember { mutableStateOf<String?>(null) }
+    var purchasedKey by remember { mutableStateOf("") }
+    var purchaseMessage by remember { mutableStateOf("") }
+    var refresh by remember { mutableIntStateOf(0) }
 
     val scope = rememberCoroutineScope()
 
@@ -787,7 +912,9 @@ fun Products(ctx: Context) {
     Page {
         Heading("Products")
 
-        Secondary("Choose a product and category to get your key.")
+        Secondary(
+            "Choose a product and category to get your key."
+        )
 
         if (loading) {
             LoadingLine()
@@ -797,7 +924,9 @@ fun Products(ctx: Context) {
 
         if (!loading && error.isEmpty() && products.isEmpty()) {
             Section {
-                Secondary("No products are currently available.")
+                Secondary(
+                    "No products are currently available."
+                )
             }
         }
 
@@ -935,23 +1064,19 @@ fun Products(ctx: Context) {
     }
 }
 
+/* ---------------------------------------------------------
+   MY KEYS
+   --------------------------------------------------------- */
+
 @Composable
 fun Keys() {
     var keys by remember {
         mutableStateOf<List<KeyRecord>>(emptyList())
     }
 
-    var loading by remember {
-        mutableStateOf(true)
-    }
-
-    var error by remember {
-        mutableStateOf("")
-    }
-
-    var refresh by remember {
-        mutableIntStateOf(0)
-    }
+    var loading by remember { mutableStateOf(true) }
+    var error by remember { mutableStateOf("") }
+    var refresh by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(refresh) {
         loading = true
@@ -984,11 +1109,7 @@ fun Keys() {
         }
 
         keys.forEach { key ->
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 5.dp)
-            ) {
+            Section {
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -1006,16 +1127,12 @@ fun Keys() {
                     )
                 }
 
-                Spacer(Modifier.height(8.dp))
-
                 Text(
                     key.key_value,
                     color = White,
                     fontFamily = FontFamily.Monospace,
                     fontSize = 13.sp
                 )
-
-                Spacer(Modifier.height(5.dp))
 
                 Secondary(key.product_name)
 
@@ -1025,10 +1142,11 @@ fun Keys() {
                         Secondary("Created: $it")
                     }
 
-                // The unsupported expires_at property was removed.
+                // expires_at is intentionally omitted because
+                // KeyRecord does not expose that property.
 
                 HorizontalDivider(
-                    modifier = Modifier.padding(top = 14.dp),
+                    modifier = Modifier.padding(top = 6.dp),
                     color = BorderGray
                 )
             }
@@ -1036,23 +1154,19 @@ fun Keys() {
     }
 }
 
+/* ---------------------------------------------------------
+   UPDATES
+   --------------------------------------------------------- */
+
 @Composable
 fun Updates(ctx: Context) {
     var updates by remember {
         mutableStateOf<List<PanelUpdate>>(emptyList())
     }
 
-    var loading by remember {
-        mutableStateOf(true)
-    }
-
-    var error by remember {
-        mutableStateOf("")
-    }
-
-    var refresh by remember {
-        mutableIntStateOf(0)
-    }
+    var loading by remember { mutableStateOf(true) }
+    var error by remember { mutableStateOf("") }
+    var refresh by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(refresh) {
         loading = true
@@ -1070,7 +1184,9 @@ fun Updates(ctx: Context) {
     Page {
         Heading("Updates")
 
-        Secondary("Latest product releases and announcements.")
+        Secondary(
+            "Latest product releases and announcements."
+        )
 
         if (loading) {
             LoadingLine()
@@ -1080,17 +1196,14 @@ fun Updates(ctx: Context) {
 
         if (!loading && error.isEmpty() && updates.isEmpty()) {
             Section {
-                Secondary("No updates have been published yet.")
+                Secondary(
+                    "No updates have been published yet."
+                )
             }
         }
 
         updates.forEach { update ->
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 5.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
+            Section {
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -1141,8 +1254,6 @@ fun Updates(ctx: Context) {
                             )
                         }
                     }
-
-                HorizontalDivider(color = BorderGray)
             }
         }
     }
